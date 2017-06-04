@@ -1,0 +1,150 @@
+@import '_reset.less';
+@import '_fonts.less';
+@import (less) '../../node_modules/leaflet/dist/leaflet.css';
+* {
+  box-sizing: border-box;
+}
+
+@darkBg: #151515;
+@lightFontColor: #fafafa;
+@topBarHeight: 70px;
+@rightBarWidth: 250px;
+.body-font() {
+  font-family: 'Roboto';
+}
+.monospace-font() {
+  font-family: 'Roboto Mono';
+}
+body {
+  font-size: 18px;
+  .body-font();
+}
+:focus {
+    outline: 0;
+    /* or */
+    outline: none;
+}
+.top-bar-controls {
+  position: absolute;
+  background: @darkBg;
+  top: 0;
+  height: @topBarHeight;
+  left: 0;
+  right: 0;
+  display: flex;
+
+  .top-bar-controls-left {
+    margin-right: 20px;
+    flex: 0 0 auto;
+  }
+  .top-bar-controls-center {
+    flex: 1 1 auto;
+  }
+  .top-bar-controls-right {
+    flex: 0 0 auto;
+    margin-right: 20px;
+    display: flex;
+  }
+
+  .follow {
+    margin-right: 20px;
+  }
+}
+
+.right-bar-instruments {
+  position: absolute;
+  top: @topBarHeight;
+  bottom: 0px;
+  right: 0;
+  width: 0px;
+  background: @darkBg;
+  z-index: 11111;
+  overflow: hidden;
+  transition: width 0.25s;
+  .wrapper {
+    width: @rightBarWidth;
+    overflow: hidden;
+  }
+  &.visible {
+    width: @rightBarWidth;
+  }
+}
+.instrument {
+  padding: 20px;
+  .top-row {
+    display: flex;
+  }
+  .title, .unit {
+    flex: 1 1 auto;
+    font-size: 20px;
+    color: darken(@lightFontColor, 20%);
+    text-align: right;
+  }
+  .value {
+    .monospace-font();
+    margin: 10px 0;
+    font-size: 60px;
+    color: @lightFontColor;
+    text-align: right;
+  }
+}
+
+.leaflet-container {
+  background-color:#c5e8ff;
+}
+
+.map-wrapper {
+  position: absolute;
+  top: @topBarHeight;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: right 0.25s;
+  &.instruments-visible {
+    right: @rightBarWidth;
+  }
+}
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.navigation {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+}
+.leaflet-pane.leaflet-basemap-pane {
+  z-index: 100;
+}
+.generate-panes(@counter) when (@counter >= 0) {
+  .generate-panes((@counter - 1));
+  .leaflet-pane.leaflet-chart-@{counter}-pane {
+    z-index: (399 - @counter);
+  }
+}
+.generate-panes(10);
+
+.top-bar-button {
+  background-color: lighten(@darkBg, 5%);
+  display: block;
+  height: 100%;
+  border: 0;
+  color: #fafafa;
+  width: @topBarHeight * 1.1;
+  cursor: pointer;
+  border-left: 2px solid lighten(@darkBg, 25%);
+  border-right: 2px solid lighten(@darkBg, 25%);
+  font-size: 28px;
+  &.enabled {
+    text-shadow: 0px 0px 30px #fff679;
+    color: #cbfff8;
+  }
+  &:active {
+    background-color: lighten(@darkBg, 10%);
+    font-size: 24px;
+  }
+}

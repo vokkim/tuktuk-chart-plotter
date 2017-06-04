@@ -1,0 +1,56 @@
+{
+  "name": "tuktuk-chart-plotter",
+  "version": "0.0.1",
+  "description": "Chart plotter with SignalK and MBTiles support",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "bundle": "npm run bundle:css && npm run bundle:js",
+    "bundle:js": "rm ./public/bundle.js || true && ./node_modules/.bin/webpack --hide-modules --bail -p --config=webpack.bundle.js",
+    "bundle:css": "rm ./public/bundle.css || true && ./node_modules/.bin/lessc src/styles/app.less > .bundle.css && node_modules/postcss-cli/bin/postcss --use autoprefixer --replace .bundle.css && mv .bundle.css public/bundle.css",
+    "watch:js": "./node_modules/.bin/webpack --hide-modules --watch --config=webpack.bundle.js",
+    "watch:css": "npm run bundle:css && watch-run -p 'src/styles/*.less' 'npm run bundle:css'",
+    "watch:server": "nodemon --ext js,css,json --watch src index.js",
+    "watch": "npm run watch:js & npm run watch:css & npm run watch:server & wait"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vokkim/tuktuk-chart-plotter.git"
+  },
+  "author": "Mikko Vesikkala",
+  "keywords": ["signalk", "mbtiles", "chart", "plotter", "marine"],
+  "dependencies": {
+    "@mapbox/mbtiles": "0.9.0",
+    "bacon.atom": "4.0.7",
+    "baconjs": "0.7.93",
+    "baret": "1.0.3",
+    "classnames": "2.2.5",
+    "compression": "1.6.2",
+    "express": "4.15.3",
+    "geolib": "2.0.22",
+    "leaflet": "1.0.3",
+    "leaflet-rotatedmarker": "0.1.2",
+    "less": "2.7.2",
+    "lodash": "4.17.4",
+    "numeral": "2.0.6",
+    "partial.lenses": "11.9.0",
+    "react": "15.5.4",
+    "react-dom": "15.5.4",
+    "request": "2.81.0",
+    "signalk-client": "0.0.1-4",
+    "whatwg-fetch": "2.0.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "7.1.1",
+    "nodemon": "1.11.0",
+    "postcss-cli": "4.0.0",
+    "webpack": "2.6.1",
+    "watch-run": "1.2.5",
+    "babel-cli": "6.24.1",
+    "babel-core": "6.24.1",
+    "babel-loader": "7.0.0",
+    "babel-preset-es2015": "6.24.1",
+    "babel-preset-react": "6.24.1",
+    "babel-plugin-react-transform": "2.0.2"
+  }
+}
