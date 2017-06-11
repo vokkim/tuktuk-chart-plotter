@@ -3,7 +3,20 @@ import Bacon from 'baconjs'
 import _ from 'lodash'
 import SignalK from 'signalk-client'
 
+function parseAddress(address) {
+  if (_.isEmpty(address)) {
+    throw `Empty SignalK address!`
+  }
+  if (_.isEmpty(address.split(':')[0])) {
+    // Relative address such as ':80'
+    return `${window.location.hostname}:${address.split(':')[1]}`
+  } else {
+    return address
+  }
+}
+
 function connect(address) {
+
   const rawStream = new Bacon.Bus()
   let selfId
 
@@ -37,7 +50,7 @@ function connect(address) {
     rawStream.push(new Bacon.Error(e))
   }
   const signalk = new SignalK.Client()
-  const connection = signalk.connectDelta(address, onMessage, onConnect, onDisconnect, onError, onDisconnect, 'none')
+  const connection = signalk.connectDelta(parseAddress(address), onMessage, onConnect, onDisconnect, onError, onDisconnect, 'none')
 
   const selfStream = rawStream.filter(msg => msg.context === 'vessels.'+selfId)
 
