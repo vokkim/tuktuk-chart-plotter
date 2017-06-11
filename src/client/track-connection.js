@@ -11,7 +11,7 @@ function connect(providers) {
   }
   const provider = providers[0]
   if (provider.type === 'daily-trackserver') {
-    return DailyTrackServerProvider(provider.address)
+    return DailyTrackServerProvider(provider.address, provider.vesselId)
   } else if (provider.type === 'dummy-trackserver') {
     return DummyTrackServerProvider()
   } else {
