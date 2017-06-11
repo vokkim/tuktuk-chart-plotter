@@ -284,12 +284,18 @@ function addCharts(map, charts) {
 }
 
 let geoJSONLayers = []
+const trackColors = [
+  "#4c79a6",
+  "#46a65b",
+  "#a262a6",
+]
 
 function renderTracks(map, tracks) {
   geoJSONLayers.forEach(layer => map.removeLayer(layer))
   geoJSONLayers = []
-  tracks.forEach(({date, route}) => {
-    const geoJSONLayer = Leaf.geoJSON(route, {style: {color: '#0088FF'}})
+  tracks.forEach(({date, route}, i) => {
+    const dayIndex = (new Date(date).getTime() / 86400000).toFixed()
+    const geoJSONLayer = Leaf.geoJSON(route, {style: {color: trackColors[dayIndex % trackColors.length]}})
     geoJSONLayers.push(geoJSONLayer)
     geoJSONLayer.addTo(map)
   })
