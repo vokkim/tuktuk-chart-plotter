@@ -11,10 +11,12 @@ import Map from './map'
 import Connection from './data-connection'
 import {toDegrees} from './utils'
 import InstrumentConfig from './instrument-config'
+import fullscreen from './fullscreen'
 numeral.nullFormat('N/A')
 
 const defaultSettings = {
   zoom: 13,
+  fullscreen: false,
   course: COG,
   follow: true,
   showInstruments: true,
@@ -25,6 +27,8 @@ const settings = Atom(_.assign(defaultSettings, window.INITIAL_SETTINGS || {}))
 
 const connection = Connection(settings.get().data)
 
+fullscreen(settings)
+
 const Controls = ({settings}) => {
   return (
     <div className='top-bar-controls'>
@@ -32,7 +36,12 @@ const Controls = ({settings}) => {
       </div>
       <div className='top-bar-controls-center'></div>
       <div className='top-bar-controls-right'>
-      <TopBarButton
+        <TopBarButton
+          className='fullscreen'
+          enabled={settings.view(L.prop('fullscreen'))}
+          iconClass='icon-fullscreen'
+          onClick={() => settings.view(L.prop('fullscreen')).modify(v => !v)} />
+        <TopBarButton
           className='instruments'
           enabled={settings.view(L.prop('showInstruments'))}
           iconClass='icon-meter'

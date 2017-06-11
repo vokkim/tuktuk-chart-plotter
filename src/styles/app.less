@@ -17,7 +17,7 @@
 @darkBg: #151515;
 @lightFontColor: #fafafa;
 @desktopTopBarHeight: 70px;
-@mobileTopBarHeight: 55px;
+@mobileTopBarHeight: 60px;
 @rightBarWidth: 11em;
 .body-font() {
   font-family: 'Roboto';
@@ -213,5 +213,25 @@ body {
   &:active {
     background-color: lighten(@darkBg, 10%);
     font-size: 150%;
+  }
+}
+
+.top-bar-button.fullscreen {
+  @media @mobile {
+    display: none;
+  }
+  margin-right: 20px;
+  .icon-fullscreen {
+    .icon-font-common();
+  }
+  &.disabled .icon-fullscreen:before {
+    content: "\e989";
+  }
+  &.enabled .icon-fullscreen:before {
+    content: "\e98c";
+  }
+  &.enabled {
+    text-shadow: none;
+    color: #fafafa;
   }
 }

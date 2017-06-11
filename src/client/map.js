@@ -160,7 +160,7 @@ function addBasemap(map) {
 }
 
 function calculatePointer(position, course, speed) {
-  if (position && position.latitude && position.longitude && course && 0.2) {
+  if (position && position.latitude && position.longitude && course && speed > 0.5) {
     const distance = speed * 60*2 // Speed in m/s
     const start = [position.latitude, position.longitude]
     const destination = computeDestinationPoint({lat: position.latitude, lon: position.longitude}, distance, toDegrees(course))
