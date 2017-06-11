@@ -1,19 +1,19 @@
 import numeral from 'numeral'
 import Bacon from 'baconjs'
 import _ from 'lodash'
-import {toDegrees} from './utils'
+import {toDegrees, toKnots} from './utils'
 
 const InstrumentConfigs = {
   sog: {
     dataKey: 'navigation.speedOverGround',
-    transformFn: _.identity,
+    transformFn: toKnots,
     className: 'sog',
     title: 'SOG',
     unit: 'kn'
   },
   stw: {
     dataKey: 'navigation.speedThroughWater',
-    transformFn: _.identity,
+    transformFn: toKnots,
     className: 'stw',
     title: 'STW',
     unit: 'kn'

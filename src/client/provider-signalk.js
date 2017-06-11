@@ -78,6 +78,5 @@ function connect(address) {
     rawStream,
     data
   }
-  //signalk.discoverAndConnect()
 }
 module.exports = connect

@@ -43,7 +43,7 @@ function initMap(connection, settings) {
 
   const myVessel = Leaf.marker([0, 0], {icon: resolveIcon(vesselIcons, initialSettings.zoom), draggable: false, zIndexOffset: 1000, rotationOrigin: 'center center', rotationAngle: 0})
   myVessel.addTo(map)
-  const pointerEnd = Leaf.circle([0, 0], {radius: 10, color: 'red', fillOpacity: 0})
+  const pointerEnd = Leaf.circle([0, 0], {radius: 20, color: 'red', fillOpacity: 0})
   pointerEnd.addTo(map)
   const pointer = Leaf.polyline([], {color: 'red'})
   pointer.addTo(map)
@@ -57,9 +57,6 @@ function initMap(connection, settings) {
     if (position) {
       const newPos = [position.latitude, position.longitude]
       myVessel.setLatLng(newPos)
-      if (settings.follow) {
-        map.panTo(newPos)
-      }
     }
 
     const course = settings.course === COG ? vesselData['navigation.courseOverGroundTrue'] : vesselData['navigation.headingTrue']
@@ -74,6 +71,14 @@ function initMap(connection, settings) {
     if (pointerCoordinates) {
       pointer.setLatLngs(pointerCoordinates)
       pointerEnd.setLatLng(pointerCoordinates[1])
+    } else {
+      pointer.setLatLngs([[0, 0], [0,0]])
+      pointerEnd.setLatLng([0, 0])
+    }
+    if (settings.follow && pointerCoordinates) {
+      map.panTo(pointerCoordinates[1])
+    } else if (settings.follow && position) {
+      map.panTo([position.latitude, position.longitude])
     }
   })
 
@@ -155,8 +160,8 @@ function addBasemap(map) {
 }
 
 function calculatePointer(position, course, speed) {
-  if (position && position.latitude && position.longitude && course && speed > 0.5) {
-    const distance = speed * KNOTS_TO_MS * 60*5 // 5 minutes
+  if (position && position.latitude && position.longitude && course && 0.2) {
+    const distance = speed * 60*5 // Speed in m/s
     const start = [position.latitude, position.longitude]
     const destination = computeDestinationPoint({lat: position.latitude, lon: position.longitude}, distance, toDegrees(course))
     const end = [destination.latitude, destination.longitude]
