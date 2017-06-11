@@ -278,7 +278,9 @@ function renderTracks(map, tracks) {
   geoJSONLayers = []
   tracks.forEach(({date, route}, i) => {
     const dayIndex = (new Date(date).getTime() / 86400000).toFixed()
-    const geoJSONLayer = Leaf.geoJSON(route, {style: {color: trackColors[dayIndex % trackColors.length]}})
+    const basicStyle = {color: trackColors[dayIndex % trackColors.length]}
+    const geoJSONLayer = Leaf.geoJSON(route, {style: basicStyle})
+    geoJSONLayer.on('click', e => geoJSONLayer.setStyle(_.assign({}, basicStyle, {weight: 6})))
     geoJSONLayers.push(geoJSONLayer)
     geoJSONLayer.addTo(map)
   })
