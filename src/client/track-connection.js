@@ -1,5 +1,6 @@
 import Bacon from 'baconjs'
 import DailyTrackServerProvider from './provider-daily-trackserver'
+import DummyTrackServerProvider from './provider-dummy-trackserver'
 
 function connect(providers) {
   if (providers.length > 1) {
@@ -11,6 +12,8 @@ function connect(providers) {
   const provider = providers[0]
   if (provider.type === 'daily-trackserver') {
     return DailyTrackServerProvider(provider.address)
+  } else if (provider.type === 'dummy-trackserver') {
+    return DummyTrackServerProvider()
   } else {
     throw `Unsupported provider ${provider}`
   }
