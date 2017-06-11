@@ -1,7 +1,7 @@
 import React from 'baret'
 import * as L from 'partial.lenses'
 import Bacon from 'baconjs'
-import classNames from 'classNames'
+import classNames from 'classnames'
 import _ from 'lodash'
 import * as Leaf from 'leaflet'
 import {computeDestinationPoint} from 'geolib'
