@@ -4,6 +4,9 @@
 * {
   box-sizing: border-box;
 }
+button {
+  cursor: pointer;
+}
 
 @tabletMaxWidth: 1025;
 @mobileMaxWidth: 550;
@@ -220,7 +223,7 @@ body {
   @media @mobile {
     display: none;
   }
-  margin-right: 20px;
+  margin-left: 20px;
   .icon-fullscreen {
     .icon-font-common();
   }
@@ -233,5 +236,47 @@ body {
   &.enabled {
     text-shadow: none;
     color: #fafafa;
+  }
+}
+.path-draw-controls-wrapper {
+  display: flex;
+  height: 100%;
+}
+.path-draw-controls {
+  @drawControlBackground: #303052;
+
+  align-items: center;
+  color: #fafafa;
+  display: flex;
+  transition: 0.25s max-width;
+  background: @drawControlBackground;
+  overflow: hidden;
+
+  button {
+    display: block;
+    padding: 20px;
+    height: 100%;
+    border: 0;
+    color: #fafafa;
+    background: @drawControlBackground;
+    font-size: 170%;
+    &:active {
+      background-color: lighten(@drawControlBackground, 10%);
+      font-size: 150%;
+    }
+  }
+  .distance {
+    padding: 20px;
+    font-size: 150%;
+    text-align: right;
+    margin-right: 10px;
+    white-space: nowrap;
+    min-width: 140px;
+  }
+  &.enabled {
+    max-width: 230px;
+  }
+  &.disabled {
+    max-width: 0;
   }
 }

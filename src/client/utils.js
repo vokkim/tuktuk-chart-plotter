@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import {MS_TO_KNOTS} from './enums'
+import {MS_TO_KNOTS, M_TO_NM} from './enums'
 
 function toDegrees(angle) {
   if (_.isFinite(angle)) {
@@ -17,7 +17,16 @@ function toKnots(speed) {
   }
 }
 
+function toNauticalMiles(distance) {
+  if (_.isFinite(distance)) {
+    return distance * M_TO_NM
+  } else {
+    return null
+  }
+}
+
 module.exports = {
   toDegrees,
-  toKnots
+  toKnots,
+  toNauticalMiles
 }

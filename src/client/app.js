@@ -9,7 +9,7 @@ import _ from 'lodash'
 import {COG, HEADING, MAX_ZOOM, MIN_ZOOM} from './enums'
 import Map from './map'
 import Connection from './data-connection'
-import {toDegrees} from './utils'
+import {toDegrees, toNauticalMiles} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 numeral.nullFormat('N/A')
@@ -17,6 +17,7 @@ numeral.nullFormat('N/A')
 const defaultSettings = {
   zoom: 13,
   fullscreen: false,
+  drawMode: false,
   course: COG,
   follow: true,
   showInstruments: true,
@@ -24,6 +25,7 @@ const defaultSettings = {
   data: []
 }
 const settings = Atom(_.assign(defaultSettings, window.INITIAL_SETTINGS || {}))
+const drawObject = Atom({distance: 0, del: false})
 
 const connection = Connection(settings.get().data)
 
@@ -36,11 +38,7 @@ const Controls = ({settings}) => {
       </div>
       <div className='top-bar-controls-center'></div>
       <div className='top-bar-controls-right'>
-        <TopBarButton
-          className='fullscreen'
-          enabled={settings.view(L.prop('fullscreen'))}
-          iconClass='icon-fullscreen'
-          onClick={() => settings.view(L.prop('fullscreen')).modify(v => !v)} />
+        {<PathDrawControls settings={settings} />}
         <TopBarButton
           className='instruments'
           enabled={settings.view(L.prop('showInstruments'))}
@@ -61,6 +59,11 @@ const Controls = ({settings}) => {
           enabled={Bacon.constant(false)}
           iconClass='icon-minus'
           onClick={() => settings.view(L.prop('zoom')).modify(zoom => Math.max(zoom - 1, MIN_ZOOM))} />
+        <TopBarButton
+          className='fullscreen'
+          enabled={settings.view(L.prop('fullscreen'))}
+          iconClass='icon-fullscreen'
+          onClick={() => settings.view(L.prop('fullscreen')).modify(v => !v)} />
       </div>
     </div>
   )
@@ -80,6 +83,28 @@ const Instruments = ({settings, data}) => {
           unit={config.unit} />
         )}
       </div>
+    </div>
+  )
+}
+
+const PathDrawControls = ({settings}) => {
+  const distance = drawObject
+    .view(L.prop('distance'))
+    .map(toNauticalMiles)
+    .map(v => numeral(v).format('0.0'))
+  return (
+    <div className='path-draw-controls-wrapper'>
+      <div className={settings.map('.drawMode').map(v => classNames('path-draw-controls', {enabled: v, disabled: !v}))}>
+        <button className='deletePath' onClick={() => drawObject.view(L.prop('del')).set(true)}>
+          <i className='icon-bin'/>
+        </button>
+        <div className='distance'>{distance} nm</div>
+      </div>
+      <TopBarButton
+        className='drawMode'
+        enabled={settings.view(L.prop('drawMode'))}
+        iconClass='icon-pencil2'
+        onClick={() => settings.view(L.prop('drawMode')).modify(v => !v)} />
     </div>
   )
 }
@@ -109,7 +134,7 @@ const App = (
   <div>
     <Controls settings={settings}/>
     <Instruments settings={settings} data={connection.data}/>
-    <Map connection={connection} settings={settings}/>
+    <Map connection={connection} settings={settings} drawObject={drawObject} />
   </div>
 )
 

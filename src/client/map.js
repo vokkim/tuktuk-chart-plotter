@@ -12,7 +12,7 @@ import {COG, HEADING, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS} from './enums'
 
 class Map extends React.Component {
   componentDidMount() {
-    initMap(this.props.connection, this.props.settings)
+    initMap(this.props.connection, this.props.settings, this.props.drawObject)
   }
   render() {
     const {settings} = this.props
@@ -24,7 +24,7 @@ class Map extends React.Component {
   }
 }
 
-function initMap(connection, settings) {
+function initMap(connection, settings, drawObject) {
   console.log('Init map')
   const initialSettings = settings.get()
   const map = Leaf.map('map', {
@@ -37,7 +37,6 @@ function initMap(connection, settings) {
   })
   window.map = map
   addBasemap(map)
-  console.log('CHARTS', initialSettings.charts)
   addCharts(map, initialSettings.charts)
   const vesselIcons = createVesselIcons()
 
@@ -82,6 +81,7 @@ function initMap(connection, settings) {
     }
   })
 
+  handleDrawPath({map, settings, drawObject})
   handleMapZoom()
   handleDragAndFollow()
   handleInstrumentsToggle()
@@ -125,6 +125,58 @@ function initMap(connection, settings) {
         map.invalidateSize(true)
       })
   }
+}
+
+function handleDrawPath({map, settings, drawObject}) {
+  const pathMarker = Leaf.icon({
+    iconUrl: 'public/path-marker.png',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+  })
+  let path = []
+  let lastMoveAt = undefined
+  const del = drawObject.view(L.prop('del'))
+  const pathPolyline = Leaf.polyline([], {color: '#3e3e86', weight: 5})
+  pathPolyline.addTo(map)
+
+  Bacon.fromEvent(map, 'click')
+    .filter(settings.map('.drawMode'))
+    .filter(e => _.every(path, marker => e.latlng.distanceTo(marker._latlng) > 30))
+    .filter(() => lastMoveAt === undefined || Date.now() - lastMoveAt > 50) // Do not add new marker if one was just dragged
+    .map(e => {
+      const {latlng} = e
+      return Leaf.marker(latlng, {icon: pathMarker, draggable: true, zIndexOffset: 900})
+    })
+    .onValue(marker => {
+      marker.addTo(map)
+      path.push(marker)
+      marker.on('move', redrawPathAndChangeDistance)
+      redrawPathAndChangeDistance()
+    })
+
+  function redrawPathAndChangeDistance() {
+    lastMoveAt = Date.now()
+    const latlngs = _.map(path, marker => marker._latlng)
+    pathPolyline.setLatLngs(latlngs)
+    const distance = _.reduce(path, (sum, marker, i) => {
+      if (i > 0) {
+        return sum + path[i-1]._latlng.distanceTo(marker._latlng)
+      } else {
+        return 0
+      }
+      return
+    }, 0)
+    drawObject.view(L.prop('distance')).set(distance)
+  }
+
+  del.filter(_.identity).changes()
+    .merge(settings.map('.drawMode').skipDuplicates().changes())
+    .onValue(() => {
+      _.each(path, marker => marker.remove())
+      path = []
+      redrawPathAndChangeDistance()
+      drawObject.view(L.prop('del')).set(false)
+    })
 }
 
 function addCharts(map, charts) {
