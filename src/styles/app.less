@@ -280,3 +280,17 @@ body {
     max-width: 0;
   }
 }
+
+.aisTooltip {
+  border-radius: 0;
+  background-color: black;
+  border: none;
+  padding: 10px;
+  color: darken(@lightFontColor, 20%);
+  .body-font();
+  font-size: 16px;
+  .name {
+    font-weight: 500;
+    color: @lightFontColor;
+  }
+}

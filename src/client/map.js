@@ -3,11 +3,12 @@ import * as L from 'partial.lenses'
 import Bacon from 'baconjs'
 import classNames from 'classnames'
 import _ from 'lodash'
+import numeral from 'numeral'
 import * as Leaf from 'leaflet'
 import {computeDestinationPoint} from 'geolib'
 import LeafletRotatedMarker from 'leaflet-rotatedmarker'
 import api from './api'
-import {toDegrees} from './utils'
+import {toDegrees, toKnots} from './utils'
 import {COG, HEADING, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS} from './enums'
 
 class Map extends React.Component {
@@ -40,7 +41,7 @@ function initMap(connection, settings, drawObject) {
   addCharts(map, initialSettings.charts)
   const vesselIcons = createVesselIcons()
 
-  const myVessel = Leaf.marker([0, 0], {icon: resolveIcon(vesselIcons, initialSettings.zoom), draggable: false, zIndexOffset: 1000, rotationOrigin: 'center center', rotationAngle: 0})
+  const myVessel = Leaf.marker([0, 0], {icon: resolveIcon(vesselIcons, initialSettings.zoom), draggable: false, zIndexOffset: 990, rotationOrigin: 'center center', rotationAngle: 0})
   myVessel.addTo(map)
   const pointerEnd = Leaf.circle([0, 0], {radius: 20, color: 'red', fillOpacity: 0})
   pointerEnd.addTo(map)
@@ -48,7 +49,7 @@ function initMap(connection, settings, drawObject) {
   pointer.addTo(map)
 
   const vesselData = Bacon.combineTemplate({
-    vesselData: connection.data,
+    vesselData: connection.selfData,
     settings
   })
   vesselData.onValue(({vesselData, settings}) => {
@@ -81,6 +82,7 @@ function initMap(connection, settings, drawObject) {
     }
   })
 
+  handleAisTargets({map, aisData: connection.aisData, settings})
   handleDrawPath({map, settings, drawObject})
   handleMapZoom()
   handleDragAndFollow()
@@ -125,6 +127,44 @@ function initMap(connection, settings, drawObject) {
         map.invalidateSize(true)
       })
   }
+}
+
+function handleAisTargets({map, aisData, settings}) {
+  let aisMarkers = {}
+  const aisTargetMarker = Leaf.icon({
+    iconUrl: 'public/ais-target-medium.png',
+    iconSize: [20, 30],
+    iconAnchor: [10, 15]
+  })
+  const aisEnabled = settings.map(s => _.get(s, 'ais.enabled', false)).skipDuplicates()
+  aisEnabled.not().filter(_.identity).onValue(() => {
+    _.each(aisMarkers, marker => marker.remove())
+    aisMarkers = {}
+  })
+  aisData.filter(aisEnabled).skipDuplicates().onValue(vessels => {
+    _.each(vessels, (v, k) => {
+      const position = v['navigation.position']
+      const course = toDegrees(_.get(v, ['navigation.courseOverGroundTrue', 'value']))
+      const sog = toKnots(_.get(v, ['navigation.speedOverGround', 'value']))
+
+      if (aisMarkers[k]) {
+        course && aisMarkers[k].setRotationAngle(course)
+        position && aisMarkers[k].setLatLng([position.value.latitude, position.value.longitude])
+      } else if (position && course) {
+        const latlng = [position.value.latitude, position.value.longitude]
+        const vesselMarker = Leaf.marker(latlng, {icon: aisTargetMarker, draggable: false, zIndexOffset: 980, rotationOrigin: 'center center', rotationAngle: course})
+        vesselMarker.addTo(map)
+        aisMarkers[k] = vesselMarker
+      }
+      if (aisMarkers[k]) {
+        const name = _.get(v, 'name.value', 'Unknown')
+        const formattedSog = numeral(sog).format('0.0')
+        const formattedCog = numeral(course).format('0')
+        const tooltip = `<div class='name'>${name}</div><div>SOG: ${formattedSog} kn</div><div>COG: ${formattedCog}</div>`
+        aisMarkers[k].bindTooltip(tooltip, {className: 'aisTooltip'})
+      }
+    })
+  })
 }
 
 function handleDrawPath({map, settings, drawObject}) {

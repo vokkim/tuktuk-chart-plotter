@@ -21,13 +21,16 @@ const defaultSettings = {
   course: COG,
   follow: true,
   showInstruments: true,
+  ais: {
+    enabled: false
+  },
   charts: [],
   data: []
 }
 const settings = Atom(_.assign(defaultSettings, window.INITIAL_SETTINGS || {}))
 const drawObject = Atom({distance: 0, del: false})
 
-const connection = Connection(settings.get().data)
+const connection = Connection({providers: settings.get().data, settings})
 
 fullscreen(settings)
 
@@ -39,6 +42,11 @@ const Controls = ({settings}) => {
       <div className='top-bar-controls-center'></div>
       <div className='top-bar-controls-right'>
         {<PathDrawControls settings={settings} />}
+         <TopBarButton
+          className='ais'
+          enabled={settings.view(L.compose(L.prop('ais'), L.prop('enabled')))}
+          iconClass='icon-feed'
+          onClick={() => settings.view(L.compose(L.prop('ais'), L.prop('enabled'))).modify(v => !v)} />
         <TopBarButton
           className='instruments'
           enabled={settings.view(L.prop('showInstruments'))}
@@ -133,7 +141,7 @@ const TopBarButton = ({enabled, className, iconClass, onClick}) => {
 const App = (
   <div>
     <Controls settings={settings}/>
-    <Instruments settings={settings} data={connection.data}/>
+    <Instruments settings={settings} data={connection.selfData}/>
     <Map connection={connection} settings={settings} drawObject={drawObject} />
   </div>
 )

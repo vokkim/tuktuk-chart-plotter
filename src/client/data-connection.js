@@ -1,7 +1,7 @@
 import Bacon from 'baconjs'
 import SignalkProvider from './provider-signalk'
 
-function connect(providers) {
+function connect({providers, settings}) {
   if (providers.length > 1) {
     throw `Only 1 data provider supported for now`
   }
@@ -12,7 +12,7 @@ function connect(providers) {
   }
   const provider = providers[0]
   if (provider.type === 'signalk') {
-    return SignalkProvider(provider.address)
+    return SignalkProvider({address: provider.address, settings})
   } else {
     throw `Unsupported provider ${provider}`
   }
