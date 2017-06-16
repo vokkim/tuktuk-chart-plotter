@@ -66,6 +66,7 @@ function connect({address, settings}) {
       const pairs = _.map(values, v => [v.path, v.value])
       return _.assign({}, sum, _.fromPairs(pairs))
     })
+    .debounceImmediate(1000)
 
   const aisData = selfStream
     .take(1)

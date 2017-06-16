@@ -75,10 +75,11 @@ function initMap(connection, settings, drawObject) {
       pointer.setLatLngs([[0, 0], [0,0]])
       pointerEnd.setLatLng([0, 0])
     }
-    if (settings.follow && pointerCoordinates) {
-      map.panTo(pointerCoordinates[1])
-    } else if (settings.follow && position) {
-      map.panTo([position.latitude, position.longitude])
+    if (settings.follow && (pointerCoordinates || position)) {
+      const to = pointerCoordinates ? pointerCoordinates[1] : [position.latitude, position.longitude]
+      if (map.getCenter().distanceTo(to) > 100) {
+        map.panTo(to)
+      }
     }
   })
 
