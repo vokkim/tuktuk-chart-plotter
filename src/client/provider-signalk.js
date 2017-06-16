@@ -20,17 +20,18 @@ function connect({address, settings}) {
       subscribe: [
         {
           path: '*',
-          period: 2000,
           format: 'delta',
           policy: 'ideal',
-          minPeriod: 1000
+          minPeriod: 3000
         }
       ]
     })
 
     c.send({
       context: 'vessels.*',
-      subscribe: [{path: '*'}] // TODO: Correct period
+      subscribe: [
+        {path: '*', period: 10000}
+      ]
     })
     console.log('CONNECTED')
   }
