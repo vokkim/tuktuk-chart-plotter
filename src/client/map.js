@@ -141,6 +141,15 @@ function handleAisTargets({map, aisData, settings}) {
     _.each(aisMarkers, marker => marker.remove())
     aisMarkers = {}
   })
+  Bacon.interval(60*1000, true).filter(aisEnabled).onValue(() => {
+    const now = Date.now()
+    const expired = _(aisMarkers)
+      .toPairs()
+      .filter(v => now - v[1]._updatedAt > 180*1000) // Remove markers if not updated in 3 minutes
+      .value()
+    aisMarkers = _.omit(aisMarkers, _.map(expired, '0'))
+    _.each(expired, v => v[1].remove())
+  })
   aisData.filter(aisEnabled).skipDuplicates().onValue(vessels => {
     _.each(vessels, (v, k) => {
       const position = v['navigation.position']
@@ -162,6 +171,7 @@ function handleAisTargets({map, aisData, settings}) {
         const formattedCog = numeral(course).format('0')
         const tooltip = `<div class='name'>${name}</div><div>SOG: ${formattedSog} kn</div><div>COG: ${formattedCog}</div>`
         aisMarkers[k].bindTooltip(tooltip, {className: 'aisTooltip'})
+        aisMarkers[k]._updatedAt = Date.now()
       }
     })
   })
