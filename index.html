@@ -1,16 +1,25 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Plotteri</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="public/bundle.css"/>
+  <link rel="stylesheet" href="public/bundle.css" />
 </head>
+
 <body>
   <script type="text/javascript">
-    window.INITIAL_SETTINGS = {};
+    window.INITIAL_SETTINGS = {
+      data: [{
+        type: "signalk",
+        address: window.location.host
+      }],
+      signalKChartHost: window.location.protocol + "//" + window.location.host
+    };
   </script>
   <div id="app"></div>
   <script src="public/bundle.js"></script>
 </body>
+
 </html>
