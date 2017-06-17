@@ -7,7 +7,8 @@ function connect({providers, settings}) {
   }
   if (providers.length === 0) {
     return {
-      data: Bacon.constant({})
+      selfData: Bacon.constant({}),
+      aisData: Bacon.constant({})
     }
   }
   const provider = providers[0]

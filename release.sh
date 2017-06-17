@@ -17,7 +17,8 @@ npm install
 NODE_ENV=production npm run bundle
 
 echo "Updating files"
-sed -i "" 's/\("version".*:.*\)".*"/\1"'$version'"/' "package.json"
+sed -i "" 's/\("version".*:.*\)".*"/\1"'$version'"/' package.json
+sed -i "" 's/DEV_VERSION/'$version'/' *.html
 
 echo "Commit and tag"
 git add .
@@ -30,5 +31,9 @@ git push --tags origin
 
 echo "Publish to npm"
 npm publish
+
+echo "Publish to S3"
+aws s3 cp --recursive public/ s3://plotteri.merikartat.space/public --region=eu-central-1 --acl public-read
+aws s3 cp s3-index.html s3://plotteri.merikartat.space/index.html --region=eu-central-1 --acl public-read
 
 echo "DONE!"
