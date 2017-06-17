@@ -39,6 +39,9 @@ function initMap(connection, settings, drawObject) {
   window.map = map
   initialSettings.worldBaseChart && addBasemap(map)
   addCharts(map, initialSettings.charts)
+  if (initialSettings.signalKChartHost) {
+    fetchSignalKCharts(map, initialSettings.signalKChartHost)
+  }
   const vesselIcons = createVesselIcons()
 
   const myVessel = Leaf.marker([0, 0], {icon: resolveIcon(vesselIcons, initialSettings.zoom), draggable: false, zIndexOffset: 990, rotationOrigin: 'center center', rotationAngle: 0})
@@ -247,6 +250,20 @@ function addCharts(map, charts) {
       map.panTo([center[1], center[0]])
     }
   }
+}
+
+function fetchSignalKCharts(map, address) {
+  fetch(address + "/signalk/v1/api/resources/charts")
+  .then(response => {
+    response.json().then(charts => {
+      _.values(charts).filter(chart => chart.tilemapUrl).forEach(chart => {
+        Leaf.tileLayer(chart.tilemapUrl).addTo(map)
+      })
+    })
+  })
+  .catch(err => {
+    console.error(err)
+  })
 }
 
 function addBasemap(map) {
