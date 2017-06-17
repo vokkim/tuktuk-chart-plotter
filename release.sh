@@ -14,7 +14,7 @@ git pull --ff-only --no-rebase origin
 
 echo "Building"
 npm install
-npm run bundle
+NODE_ENV=production npm run bundle
 
 echo "Updating files"
 sed -i "" 's/\("version".*:.*\)".*"/\1"'$version'"/' "package.json"

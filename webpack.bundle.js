@@ -13,7 +13,7 @@ module.exports = {
       loader: 'babel-loader'
     }]
   },
-  devtool: 'nosources-source-map',
+  devtool: process.env.NODE_ENV === 'production' ? 'none' : 'nosources-source-map',
   output: {
     path: path.resolve(__dirname, 'public/'),
     filename: 'bundle.js'
