@@ -24,6 +24,7 @@ const defaultSettings = {
   ais: {
     enabled: false
   },
+  worldBaseChart: true,
   charts: [],
   data: []
 }

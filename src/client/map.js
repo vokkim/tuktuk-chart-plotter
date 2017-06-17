@@ -37,7 +37,7 @@ function initMap(connection, settings, drawObject) {
     center: [0, 0],
   })
   window.map = map
-  addBasemap(map)
+  initialSettings.worldBaseChart && addBasemap(map)
   addCharts(map, initialSettings.charts)
   const vesselIcons = createVesselIcons()
 
