@@ -9,6 +9,14 @@ function toDegrees(angle) {
   }
 }
 
+function toRadians(angle) {
+  if (_.isFinite(angle)) {
+    return angle * Math.PI / 180
+  } else {
+    return null
+  }
+}
+
 function toKnots(speed) {
   if (_.isFinite(speed)) {
     return speed * MS_TO_KNOTS
@@ -27,6 +35,7 @@ function toNauticalMiles(distance) {
 
 module.exports = {
   toDegrees,
+  toRadians,
   toKnots,
   toNauticalMiles
 }

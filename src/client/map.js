@@ -9,7 +9,7 @@ import {computeDestinationPoint} from 'geolib'
 import LeafletRotatedMarker from 'leaflet-rotatedmarker'
 import api from './api'
 import {toDegrees, toKnots} from './utils'
-import {COG, HEADING, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS} from './enums'
+import {COG, HDG, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS} from './enums'
 
 class Map extends React.Component {
   componentDidMount() {
