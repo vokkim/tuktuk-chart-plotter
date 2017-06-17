@@ -1,6 +1,6 @@
 {
   "name": "tuktuk-chart-plotter",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Chart plotter with SignalK and MBTiles support",
   "main": "index.js",
   "scripts": {
