@@ -241,7 +241,7 @@ function addCharts(map, charts) {
     }
     const pane = `chart-${provider.index}`
     map.createPane(pane)
-    Leaf.tileLayer(provider.path, {maxNativeZoom: provider.maxzoom, minNativeZoom: provider.minzoom, pane}).addTo(map)
+    Leaf.tileLayer(provider.path, {detectRetina: true, maxNativeZoom: provider.maxzoom, minNativeZoom: provider.minzoom, pane}).addTo(map)
   })
 
   if (!_.isEmpty(charts)) {
