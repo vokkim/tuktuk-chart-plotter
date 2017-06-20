@@ -9,13 +9,13 @@ function connect(providers) {
   if (providers.length === 0) {
     return EmptyTrackServerProvider()
   }
-  const provider = providers[0]
-  if (provider.type === 'daily-trackserver') {
-    return DailyTrackServerProvider(provider.address, provider.vesselId)
-  } else if (provider.type === 'dummy-trackserver') {
+  const providerConfig = providers[0]
+  if (providerConfig.type === 'daily-trackserver') {
+    return DailyTrackServerProvider(providerConfig)
+  } else if (providerConfig.type === 'dummy-trackserver') {
     return DummyTrackServerProvider()
   } else {
-    throw `Unsupported provider ${provider}`
+    throw `Unsupported provider ${providerConfig}`
   }
 }
 
