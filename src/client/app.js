@@ -8,7 +8,7 @@ import Bacon from 'baconjs'
 import _ from 'lodash'
 import {COG, HDG, MAX_ZOOM, MIN_ZOOM} from './enums'
 import Map from './map'
-import Connection from './data-connection'
+import DataConnection from './data-connection'
 import {toDegrees, toNauticalMiles} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
@@ -31,7 +31,7 @@ const defaultSettings = {
 const settings = Atom(_.assign(defaultSettings, window.INITIAL_SETTINGS || {}))
 const drawObject = Atom({distance: 0, del: false})
 
-const connection = Connection({providers: settings.get().data, settings})
+const dataConnection = DataConnection({providers: settings.get().data, settings})
 
 fullscreen(settings)
 
@@ -142,8 +142,8 @@ const TopBarButton = ({enabled, className, iconClass, onClick}) => {
 const App = (
   <div>
     <Controls settings={settings}/>
-    <Instruments settings={settings} data={connection.selfData}/>
-    <Map connection={connection} settings={settings} drawObject={drawObject} />
+    <Instruments settings={settings} data={dataConnection.selfData}/>
+    <Map dataConnection={dataConnection} settings={settings} drawObject={drawObject} />
   </div>
 )
 
