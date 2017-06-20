@@ -13,7 +13,7 @@ import {COG, HDG, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS, EXTENSION_LINE_OFF, EXTENSION
 
 class Map extends React.Component {
   componentDidMount() {
-    initMap(this.props.connection, this.props.settings, this.props.drawObject)
+    initMap(this.props.dataConnection, this.props.settings, this.props.drawObject)
   }
   render() {
     const {settings} = this.props
@@ -26,7 +26,7 @@ class Map extends React.Component {
   }
 }
 
-function initMap(connection, settings, drawObject) {
+function initMap(dataConnection, settings, drawObject) {
   console.log('Init map')
   const initialSettings = settings.get()
   const map = Leaf.map('map', {
@@ -52,7 +52,7 @@ function initMap(connection, settings, drawObject) {
   pointer.addTo(map)
 
   const vesselData = Bacon.combineTemplate({
-    vesselData: connection.selfData,
+    vesselData: dataConnection.selfData,
     settings
   })
   vesselData.onValue(({vesselData, settings}) => {
@@ -86,7 +86,7 @@ function initMap(connection, settings, drawObject) {
     }
   })
 
-  handleAisTargets({map, aisData: connection.aisData, settings})
+  handleAisTargets({map, aisData: dataConnection.aisData, settings})
   handleDrawPath({map, settings, drawObject})
   handleMapZoom()
   handleDragAndFollow()
