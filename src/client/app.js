@@ -10,6 +10,7 @@ import _ from 'lodash'
 import {COG, HDG, MAX_ZOOM, MIN_ZOOM, EXTENSION_LINE_OFF, EXTENSION_LINE_2_MIN, EXTENSION_LINE_5_MIN, EXTENSION_LINE_10_MIN} from './enums'
 import Map from './map'
 import DataConnection from './data-connection'
+import TrackConnection from './track-connection'
 import {toDegrees, toNauticalMiles} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
@@ -19,6 +20,7 @@ numeral.nullFormat('N/A')
 const drawObject = Atom({distance: 0, del: false})
 
 const dataConnection = DataConnection({providers: settings.get().data, settings})
+const trackConnection = TrackConnection(settings.get().tracks)
 
 fullscreen(settings)
 
@@ -320,7 +322,7 @@ const App = (
       if (loading) {
         return <div className='charts-loading map-wrapper'><h2>Loading ...</h2></div>
       } else {
-        return <Map dataConnection={dataConnection} settings={settings} drawObject={drawObject} />
+        return <Map dataConnection={dataConnection} trackConnection={trackConnection} settings={settings} drawObject={drawObject} />
       }
     })}
   </div>
