@@ -9,6 +9,7 @@ import _ from 'lodash'
 import {COG, HDG, MAX_ZOOM, MIN_ZOOM} from './enums'
 import Map from './map'
 import DataConnection from './data-connection'
+import TrackConnection from './track-connection'
 import {toDegrees, toNauticalMiles} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
@@ -32,6 +33,7 @@ const settings = Atom(_.assign(defaultSettings, window.INITIAL_SETTINGS || {}))
 const drawObject = Atom({distance: 0, del: false})
 
 const dataConnection = DataConnection({providers: settings.get().data, settings})
+const trackConnection = TrackConnection(settings.get().tracks)
 
 fullscreen(settings)
 
@@ -143,7 +145,7 @@ const App = (
   <div>
     <Controls settings={settings}/>
     <Instruments settings={settings} data={dataConnection.selfData}/>
-    <Map dataConnection={dataConnection} settings={settings} drawObject={drawObject} />
+    <Map dataConnection={dataConnection} trackConnection={trackConnection} settings={settings} drawObject={drawObject} />
   </div>
 )
 
