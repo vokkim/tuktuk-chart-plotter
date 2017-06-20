@@ -13,7 +13,7 @@ import {COG, HDG, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS, EXTENSION_LINE_OFF, EXTENSION
 
 class Map extends React.Component {
   componentDidMount() {
-    initMap(this.props.dataConnection, this.props.settings, this.props.drawObject)
+    initMap(this.props.dataConnection, this.props.trackConnection, this.props.settings, this.props.drawObject)
   }
   render() {
     const {settings} = this.props
@@ -26,7 +26,7 @@ class Map extends React.Component {
   }
 }
 
-function initMap(dataConnection, settings, drawObject) {
+function initMap(dataConnection, trackConnection, settings, drawObject) {
   console.log('Init map')
   const initialSettings = settings.get()
   const map = Leaf.map('map', {
@@ -91,6 +91,7 @@ function initMap(dataConnection, settings, drawObject) {
   handleMapZoom()
   handleDragAndFollow()
   handleInstrumentsToggle()
+  showTracksOnMapMove()
   function handleMapZoom() {
     settings.map('.zoom').skipDuplicates().onValue(zoom => {
       map.setZoom(zoom)
@@ -132,6 +133,14 @@ function initMap(dataConnection, settings, drawObject) {
       .onValue(() => {
         map.invalidateSize(true)
       })
+  }
+
+  function showTracksOnMapMove() {
+    Bacon.fromEvent(map, 'moveend')
+      .map(() => map.getBounds())
+      .skipDuplicates(_.isEqual)
+      .flatMapLatest(trackConnection.queryTracks)
+      .onValue(tracks => renderTracks(map, tracks))
   }
 }
 
@@ -254,6 +263,18 @@ function addCharts(map, providers) {
     } else if (bounds) {
       map.fitBounds(bounds)
     }
+  })
+}
+
+let geoJSONLayers = []
+
+function renderTracks(map, tracks) {
+  geoJSONLayers.forEach(layer => map.removeLayer(layer))
+  geoJSONLayers = []
+  tracks.forEach(({date, route}) => {
+    const geoJSONLayer = Leaf.geoJSON(route, {style: {color: '#0088FF'}})
+    geoJSONLayers.push(geoJSONLayer)
+    geoJSONLayer.addTo(map)
   })
 }
 
