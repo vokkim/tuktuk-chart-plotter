@@ -1,12 +1,12 @@
 import api from './api'
 
-function initialize(trackServerAddress, vesselId) {
+function initialize({address, vesselId}) {
   return {
     queryTracks
   }
 
   function queryTracks(bbox) {
-    return api.get({url: `${trackServerAddress}/${vesselId}/daily-tracks/?bbox=${bbox.toBBoxString()}`})
+    return api.get({url: `${address}/${vesselId}/daily-tracks/?bbox=${bbox.toBBoxString()}`})
   }
 }
 
