@@ -35,6 +35,7 @@ function initMap(connection, settings, drawObject) {
     minZoom: MIN_ZOOM,
     maxZoom: MAX_ZOOM,
     center: [0, 0],
+    attributionControl: false
   })
   window.map = map
   initialSettings.worldBaseChart && addBasemap(map)
