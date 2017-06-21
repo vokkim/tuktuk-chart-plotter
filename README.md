@@ -45,7 +45,7 @@ Exaple config:
   "charts": [
     {
       "index": 0,
-      "format": "png",
+      "type": "tilelayer",
       "maxzoom": 15,
       "minzoom": 4,
       "name": "liikennevirasto_rannikkokartat_public_15_4",
@@ -54,11 +54,16 @@ Exaple config:
     },
     {
       "index": 1,
-      "format": "png",
+      "type": "tilelayer",
       "maxzoom": 15,
       "minzoom": 1,
       "name": "osm",
       "path": "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    },
+    {
+      "index": 2,
+      "type": "signalk",
+      "address": "http://localhost:3000"
     }
   ]
 }

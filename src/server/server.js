@@ -11,7 +11,13 @@ app.use('/public', express.static(path.join(__dirname, '../../public')))
 
 app.get('/', function (req, res) {
   const clientConfig = Bacon.fromNodeCallback(fs, 'readFile', settings.clientConfigFile)
-    .map(config => JSON.parse(config))
+    .flatMap(config => {
+      try {
+        return Bacon.once(JSON.parse(config))
+      } catch(e) {
+        return Bacon.once(new Bacon.Error(e))
+      }
+    })
     .flatMapError(err => {
       if (err.code === 'ENOENT') {
         console.log(`No client config file found`)
