@@ -1,6 +1,8 @@
 const path = require('path')
 const webpack = require("webpack")
 
+const production = process.env.NODE_ENV === 'production'
+
 module.exports = {
   bail: true,
   entry: path.resolve(__dirname, 'src/client/app.js'),
@@ -13,7 +15,8 @@ module.exports = {
       loader: 'babel-loader'
     }]
   },
-  devtool: process.env.NODE_ENV === 'production' ? 'none' : 'nosources-source-map',
+  plugins: production ? [new webpack.optimize.ModuleConcatenationPlugin()] : [],
+  devtool: production ? 'none' : 'nosources-source-map',
   output: {
     path: path.resolve(__dirname, 'public/'),
     filename: 'bundle.js'
