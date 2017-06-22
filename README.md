@@ -65,6 +65,18 @@ Exaple config:
       "type": "signalk",
       "address": "http://localhost:3000"
     }
+  ],
+  "tracks": [
+    {
+      "type": "daily-trackserver",
+      "address": "<url to track server>",
+      "vesselId": "<vessel id on track server>",
+      "username": "basic auth user",
+      "password": "basic auth passwd"
+    },
+    {  // Or for testing purposes
+      "type": "dummy-trackserver"
+    }
   ]
 }
 ```

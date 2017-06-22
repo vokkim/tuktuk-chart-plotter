@@ -13,7 +13,7 @@ import {COG, HDG, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS} from './enums'
 
 class Map extends React.Component {
   componentDidMount() {
-    initMap(this.props.connection, this.props.settings, this.props.drawObject)
+    initMap(this.props.dataConnection, this.props.trackConnection, this.props.settings, this.props.drawObject)
   }
   render() {
     const {settings} = this.props
@@ -25,7 +25,7 @@ class Map extends React.Component {
   }
 }
 
-function initMap(connection, settings, drawObject) {
+function initMap(dataConnection, trackConnection, settings, drawObject) {
   console.log('Init map')
   const initialSettings = settings.get()
   const map = Leaf.map('map', {
@@ -51,7 +51,7 @@ function initMap(connection, settings, drawObject) {
   pointer.addTo(map)
 
   const vesselData = Bacon.combineTemplate({
-    vesselData: connection.selfData,
+    vesselData: dataConnection.selfData,
     settings
   })
   vesselData.onValue(({vesselData, settings}) => {
@@ -85,11 +85,12 @@ function initMap(connection, settings, drawObject) {
     }
   })
 
-  handleAisTargets({map, aisData: connection.aisData, settings})
+  handleAisTargets({map, aisData: dataConnection.aisData, settings})
   handleDrawPath({map, settings, drawObject})
   handleMapZoom()
   handleDragAndFollow()
   handleInstrumentsToggle()
+  showTracksOnMapMove()
   function handleMapZoom() {
     settings.map('.zoom').skipDuplicates().onValue(zoom => {
       map.setZoom(zoom)
@@ -129,6 +130,14 @@ function initMap(connection, settings, drawObject) {
       .onValue(() => {
         map.invalidateSize(true)
       })
+  }
+
+  function showTracksOnMapMove() {
+    Bacon.fromEvent(map, 'moveend')
+      .map(() => map.getBounds())
+      .skipDuplicates(_.isEqual)
+      .flatMapLatest(trackConnection.queryTracks)
+      .onValue(tracks => renderTracks(map, tracks))
   }
 }
 
@@ -271,6 +280,26 @@ function addCharts(map, charts) {
   })
   allProviders.onError(e => {
     console.error(e)
+  })
+}
+
+let geoJSONLayers = []
+const trackColors = [
+  "#4c79a6",
+  "#46a65b",
+  "#a262a6",
+]
+
+function renderTracks(map, tracks) {
+  geoJSONLayers.forEach(layer => map.removeLayer(layer))
+  geoJSONLayers = []
+  tracks.forEach(({date, route}, i) => {
+    const dayIndex = (new Date(date).getTime() / 86400000).toFixed()
+    const basicStyle = {color: trackColors[dayIndex % trackColors.length]}
+    const geoJSONLayer = Leaf.geoJSON(route, {style: basicStyle})
+    geoJSONLayer.on('click', e => geoJSONLayer.setStyle(_.assign({}, basicStyle, {weight: 6})))
+    geoJSONLayers.push(geoJSONLayer)
+    geoJSONLayer.addTo(map)
   })
 }
 

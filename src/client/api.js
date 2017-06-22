@@ -15,11 +15,19 @@ function parseJSON(response) {
   return response.json()
 }
 
-function get({url}) {
-  const request = fetch(url)
+function get({url, basicAuth}) {
+  const request = fetch(url, basicAuth ? basicAuthHeaders(basicAuth) : undefined)
     .then(checkStatus)
     .then(parseJSON)
   return Bacon.fromPromise(request)
+}
+
+function basicAuthHeaders({username, password}) {
+  return {
+    headers: {
+      'Authorization': 'Basic '+ btoa(`${username}:${password}`),
+    }
+  }
 }
 
 module.exports = {
