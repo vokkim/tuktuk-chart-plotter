@@ -20,7 +20,7 @@ const defaultSettings = {
   drawMode: false,
   course: COG,
   follow: true,
-  showMenu: true,
+  showMenu: false,
   extensionLine: EXTENSION_LINE_5_MIN,
   showInstruments: true,
   ais: {
