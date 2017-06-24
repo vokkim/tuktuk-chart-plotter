@@ -60,16 +60,18 @@ const Controls = ({settings}) => {
           enabled={settings.view(L.prop('follow'))}
           iconClass='icon-target'
           onClick={() => settings.view(L.prop('follow')).modify(v => !v)} />
-        <TopBarButton
-          className='zoom-in'
-          enabled={Bacon.constant(false)}
-          iconClass='icon-plus'
-          onClick={() => settings.view(L.prop('zoom')).modify(zoom => Math.min(zoom + 1, MAX_ZOOM))} />
-        <TopBarButton
-          className='zoom-out'
-          enabled={Bacon.constant(false)}
-          iconClass='icon-minus'
-          onClick={() => settings.view(L.prop('zoom')).modify(zoom => Math.max(zoom - 1, MIN_ZOOM))} />
+        <div className='zoom-buttons'>
+          <TopBarButton
+            className='zoom-in'
+            enabled={Bacon.constant(false)}
+            iconClass='icon-plus'
+            onClick={() => settings.view(L.prop('zoom')).modify(zoom => Math.min(zoom + 1, MAX_ZOOM))} />
+          <TopBarButton
+            className='zoom-out'
+            enabled={Bacon.constant(false)}
+            iconClass='icon-minus'
+            onClick={() => settings.view(L.prop('zoom')).modify(zoom => Math.max(zoom - 1, MIN_ZOOM))} />
+        </div>
         <TopBarButton
           className='fullscreen'
           enabled={settings.view(L.prop('fullscreen'))}

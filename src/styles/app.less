@@ -59,13 +59,19 @@ body {
 
   @media @tablet-and-desktop {
     height: @desktopTopBarHeight;
+    .top-bar-controls-left {
+      margin-right: 20px;
+    }
+
+    .follow {
+      margin-right: 20px;
+    }
   }
   @media @mobile {
    height: @mobileTopBarHeight;
   }
 
   .top-bar-controls-left {
-    margin-right: 20px;
     flex: 0 0 auto;
   }
   .top-bar-controls-center {
@@ -74,10 +80,6 @@ body {
   .top-bar-controls-right {
     flex: 0 0 auto;
     display: flex;
-  }
-
-  .follow {
-    margin-right: 20px;
   }
 }
 
@@ -223,7 +225,18 @@ body {
   }
 }
 .generate-panes(10);
-
+.zoom-buttons {
+  display: flex;
+  @media @mobile {
+    position: absolute;
+    top: @mobileTopBarHeight;
+    z-index: 11111;
+    height: 2 * @mobileTopBarHeight;
+    right: 0;
+    flex-direction: column;
+    margin-top: 10px;
+  }
+}
 .top-bar-button {
   background-color: lighten(@darkBg, 5%);
   display: block;
@@ -299,12 +312,18 @@ body {
     }
   }
   .distance {
-    padding: 20px;
     font-size: 150%;
     text-align: right;
     margin-right: 10px;
     white-space: nowrap;
-    min-width: 140px;
+    @media @tablet-and-desktop {
+      min-width: 140px;
+      padding: 20px;
+    }
+    @media @mobile {
+      min-width: 90px;
+      padding: 20px 5px;
+    }
   }
   &.enabled {
     max-width: 230px;
@@ -332,6 +351,7 @@ body {
   @borderColor: lighten(@darkBg, 20%);
   border-top: 1px solid @borderColor;
   border-bottom: 1px solid @borderColor;
+  width: 100%;
   &.open .accordion-header i {
     transform: rotate(180deg);
   }
