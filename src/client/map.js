@@ -9,7 +9,7 @@ import {computeDestinationPoint} from 'geolib'
 import LeafletRotatedMarker from 'leaflet-rotatedmarker'
 import api from './api'
 import {toDegrees, toKnots} from './utils'
-import {COG, HDG, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS} from './enums'
+import {COG, HDG, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS, EXTENSION_LINE_OFF, EXTENSION_LINE_2_MIN, EXTENSION_LINE_5_MIN, EXTENSION_LINE_10_MIN} from './enums'
 
 class Map extends React.Component {
   componentDidMount() {
@@ -70,16 +70,16 @@ function initMap(connection, settings, drawObject) {
     }
 
     const speed =  vesselData['navigation.speedOverGround']
-    const pointerCoordinates = calculatePointer(position, course, speed)
-    if (pointerCoordinates) {
-      pointer.setLatLngs(pointerCoordinates)
-      pointerEnd.setLatLng(pointerCoordinates[1])
+    const extensionLineCoordinates = calculateExtensionLine(position, course, speed, settings.extensionLine)
+    if (extensionLineCoordinates) {
+      pointer.setLatLngs([extensionLineCoordinates.start, extensionLineCoordinates.end])
+      pointerEnd.setLatLng(extensionLineCoordinates.end)
     } else {
       pointer.setLatLngs([[0, 0], [0,0]])
       pointerEnd.setLatLng([0, 0])
     }
-    if (settings.follow && (pointerCoordinates || position)) {
-      const to = pointerCoordinates ? pointerCoordinates[1] : [position.latitude, position.longitude]
+    if (settings.follow && (extensionLineCoordinates || position)) {
+      const to = extensionLineCoordinates ? extensionLineCoordinates.middle : [position.latitude, position.longitude]
       if (map.getCenter().distanceTo(to) > 100) {
         map.panTo(to)
       }
@@ -290,13 +290,21 @@ function addBasemap(map) {
   baseMap.onValue(worldBaseGeoJSON => Leaf.geoJson(worldBaseGeoJSON, {clickable: false, style: basemapStyle, pane: 'basemap'}).addTo(map))
 }
 
-function calculatePointer(position, course, speed) {
+function calculateExtensionLine(position, course, speed, extensionLineSetting) {
+  if (extensionLineSetting === EXTENSION_LINE_OFF) {
+    return undefined
+  }
+  const time = 60 * parseInt(extensionLineSetting)
   if (position && position.latitude && position.longitude && course && speed > 0.5) {
-    const distance = speed * 60*2 // Speed in m/s
+    const distance = speed * time // Speed in m/s
     const start = [position.latitude, position.longitude]
     const destination = computeDestinationPoint({lat: position.latitude, lon: position.longitude}, distance, toDegrees(course))
-    const end = [destination.latitude, destination.longitude]
-    return [start, end]
+    const middle = computeDestinationPoint({lat: position.latitude, lon: position.longitude}, distance / 2, toDegrees(course))
+    return {
+      start,
+      middle: [middle.latitude, middle.longitude],
+      end: [destination.latitude, destination.longitude]
+    }
   }
   return undefined
 }
