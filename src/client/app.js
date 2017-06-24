@@ -20,7 +20,7 @@ const defaultSettings = {
   drawMode: false,
   course: COG,
   follow: true,
-  showMenu: false,
+  showMenu: true,
   extensionLine: EXTENSION_LINE_5_MIN,
   showInstruments: true,
   ais: {
@@ -172,22 +172,30 @@ const Menu = ({settings}) => {
   return (
     <div className={settings.map(v => classNames('left-bar-menu', {visible: v.showMenu, hidden: !v.showMenu}))}>
       <div className='wrapper'>
-        <Accordion header='Options' openByDefault={true}>
-          <MenuCheckbox
-            className='ais'
-            label='AIS Targets'
-            checked={settings.view(L.compose(L.prop('ais'), L.prop('enabled')))}
-            onClick={() => settings.view(L.compose(L.prop('ais'), L.prop('enabled'))).modify(v => !v)} />
-          <MenuSwitch
-            className='heading'
-            label='Heading'
-            valueLabel={settings.view(L.prop('course'))}
-            onClick={() => settings.view(L.prop('course')).modify(v => v === COG ? HDG : COG)} />
-          <MenuSwitch
-            label='Extension line'
-            valueLabel={settings.view(L.prop('extensionLine'))}
-            onClick={toggleExtensionLine} />
-        </Accordion>
+        <div className='settings'>
+          <Accordion header='Options' openByDefault={true}>
+            <MenuCheckbox
+              className='ais'
+              label='AIS Targets'
+              checked={settings.view(L.compose(L.prop('ais'), L.prop('enabled')))}
+              onClick={() => settings.view(L.compose(L.prop('ais'), L.prop('enabled'))).modify(v => !v)} />
+            <MenuSwitch
+              className='heading'
+              label='Heading'
+              valueLabel={settings.view(L.prop('course'))}
+              onClick={() => settings.view(L.prop('course')).modify(v => v === COG ? HDG : COG)} />
+            <MenuSwitch
+              label='Extension line'
+              valueLabel={settings.view(L.prop('extensionLine'))}
+              onClick={toggleExtensionLine} />
+          </Accordion>
+        </div>
+        <div className='credits'>
+          <div className='github-link'>
+            <img src='/public/GitHub-Mark-64px.png' />
+            <a href='https://github.com/vokkim/tuktuk-chart-plotter'>https://github.com/vokkim/tuktuk-chart-plotter</a>
+          </div>
+        </div>
       </div>
     </div>
   )

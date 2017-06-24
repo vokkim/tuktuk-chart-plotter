@@ -105,6 +105,16 @@ body {
 .left-bar-menu {
   left: 0px;
 
+  .wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .settings {
+    flex: 1 1 auto;
+  }
+
   @media @tablet-and-desktop {
     transition: width 0.25s;
     .wrapper {
@@ -402,5 +412,20 @@ body {
     margin: -10px;
     padding: 10px;
     min-width: 100px;
+  }
+}
+
+.github-link {
+  display: flex;
+  background: lighten(@darkBg, 70%);
+  align-items: center;
+  img {
+    height: 45px;
+    margin: 10px 10px 10px 20px;
+  }
+  a {
+    padding: 20px 10px;
+    color: #5151b3;
+    text-decoration: none;
   }
 }
