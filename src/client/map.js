@@ -42,7 +42,7 @@ function initMap(connection, settings, drawObject) {
   initialSettings.worldBaseChart && addBasemap(map)
 
   addCharts(map, initialSettings.charts)
-  const vesselIcons = createVesselIcons()
+  const vesselIcons = createVesselIcons(_.get(initialSettings.data, ['0', 'type']) === 'geolocation')
 
   const myVessel = Leaf.marker([0, 0], {icon: resolveIcon(vesselIcons, initialSettings.zoom), draggable: false, zIndexOffset: 990, rotationOrigin: 'center center', rotationAngle: 0})
   myVessel.addTo(map)
@@ -310,7 +310,15 @@ function calculateExtensionLine(position, course, speed, extensionLineSetting) {
 }
 
 
-function createVesselIcons() {
+function createVesselIcons(shouldUseRoundIcon) {
+  if (shouldUseRoundIcon) {
+    const icon = Leaf.icon({
+      iconUrl: 'public/vessel-marker-round.png',
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    })
+    return {large: icon, medium: icon, small: icon}
+  }
   const large = Leaf.icon({
     iconUrl: 'public/vessel-large.png',
     iconSize: [20, 50],
