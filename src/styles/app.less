@@ -19,9 +19,11 @@ button {
 @desktop: ~"(min-width: @{desktopMinWidth}px)";
 @darkBg: #151515;
 @lightFontColor: #fafafa;
+@labelFontColor: darken(@lightFontColor, 20%);
 @desktopTopBarHeight: 70px;
 @mobileTopBarHeight: 60px;
 @rightBarWidth: 11em;
+@menuWidth: 22em;
 .body-font() {
   font-family: 'Roboto';
 }
@@ -40,6 +42,7 @@ body {
     font-size: 13px;
   }
   .body-font();
+  color: @lightFontColor;
 }
 :focus {
     outline: 0;
@@ -78,9 +81,8 @@ body {
   }
 }
 
-.right-bar-instruments {
+.left-bar-menu, .right-bar-instruments {
   position: absolute;
-
   @media @tablet-and-desktop {
     top: @desktopTopBarHeight;
   }
@@ -89,13 +91,41 @@ body {
     top: @mobileTopBarHeight;
   }
 
-  bottom: 0px;
-  right: 0;
-  width: 0px;
   background: @darkBg;
   z-index: 11111;
   overflow-x: hidden;
   overflow-y: auto;
+
+  bottom: 0px;
+  width: 0px;
+}
+
+.left-bar-menu {
+  left: 0px;
+
+  @media @tablet-and-desktop {
+    transition: width 0.25s;
+    .wrapper {
+      width: @menuWidth;
+      overflow: hidden;
+    }
+    &.visible {
+      width: @menuWidth;
+    }
+  }
+  @media @mobile {
+    &.visible {
+      left: 0;
+      width: 100%;
+    }
+    .wrapper {
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+}
+.right-bar-instruments {
+  right: 0px;
 
   @media @tablet-and-desktop {
     transition: width 0.25s;
@@ -120,6 +150,7 @@ body {
 }
 .instrument {
   padding: 10px 20px;
+  min-height: 100px;
 
   @media @mobile {
     width: 50%;
@@ -130,7 +161,7 @@ body {
   .title, .unit {
     flex: 1 1 auto;
     font-size: 110%;
-    color: darken(@lightFontColor, 20%);
+    color: @labelFontColor;
     text-align: right;
   }
   .value {
@@ -163,6 +194,9 @@ body {
   @media @tablet-and-desktop {
     &.instruments-visible {
       right: @rightBarWidth;
+    }
+    &.menu-visible {
+      left: @menuWidth;
     }
   }
 }
@@ -291,5 +325,56 @@ body {
   .name {
     font-weight: 500;
     color: @lightFontColor;
+  }
+}
+
+.accordion {
+  @borderColor: lighten(@darkBg, 20%);
+  border-top: 1px solid @borderColor;
+  border-bottom: 1px solid @borderColor;
+  &.open .accordion-header i {
+    transform: rotate(180deg);
+  }
+  .accordion-header {
+    padding: 20px;
+    display: flex;
+    font-size: 18px;
+    cursor: pointer;
+    > *:first-child {
+      flex: 1 1 auto;
+    }
+    > i {
+      text-align: center;
+      flex: 0 0 20px;
+      display: block;
+      transition: transform 0.1s;
+    }
+  }
+  .accordion-content {
+    padding: 10px 0;
+  }
+}
+
+.menu-checkbox, .menu-switch {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  display: flex;
+  color: @lightFontColor;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 18px;
+  > span:first-child {
+    flex: 1 1 auto;
+    color: @labelFontColor;
+  }
+  > i {
+    text-align: right;
+    flex: 0 0 40px;
+  }
+  > span:last-child {
+    flex: 0 0 auto;
+    text-align: right;
   }
 }

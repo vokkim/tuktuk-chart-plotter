@@ -17,8 +17,9 @@ class Map extends React.Component {
   }
   render() {
     const {settings} = this.props
+    const classes = settings.map(v => classNames('map-wrapper', {'instruments-visible': v.showInstruments, 'menu-visible': v.showMenu}))
     return (
-      <div className={settings.map(v => classNames('map-wrapper', {'instruments-visible': v.showInstruments}))}>
+      <div className={classes}>
         <div id='map'></div>
       </div>
     )
@@ -124,6 +125,8 @@ function initMap(connection, settings, drawObject) {
 
   function handleInstrumentsToggle() {
     settings.map('.showInstruments')
+      .changes()
+      .merge(settings.map('.showMenu').changes())
       .skipDuplicates()
       .delay(250)
       .onValue(() => {
