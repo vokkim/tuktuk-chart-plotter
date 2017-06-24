@@ -18,7 +18,7 @@ NODE_ENV=production npm run bundle
 
 echo "Updating files"
 sed -i "" 's/\("version".*:.*\)".*"/\1"'$version'"/' package.json
-sed -i "" 's/DEV_VERSION/'$version'/' *.html
+sed -i "" 's/\?v=[0-9]*\.[0-9]*\.[0-9]*/\?v='$version'/' *.html
 
 echo "Commit and tag"
 git add .
