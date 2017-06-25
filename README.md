@@ -49,7 +49,7 @@ Exaple config:
       "maxzoom": 15,
       "minzoom": 4,
       "name": "liikennevirasto_rannikkokartat_public_15_4",
-      "path": "/charts/liikennevirasto_rannikkokartat_public_15_4/{z}/{x}/{y}",
+      "tilemapUrl": "/charts/liikennevirasto_rannikkokartat_public_15_4/{z}/{x}/{y}",
       "center": [23.4942626953125, 62.746653958706545, 9]
     },
     {

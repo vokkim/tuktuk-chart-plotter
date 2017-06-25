@@ -12,25 +12,9 @@ import Connection from './data-connection'
 import {toDegrees, toNauticalMiles} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
+import {settings} from './settings'
 numeral.nullFormat('N/A')
 
-const defaultSettings = {
-  zoom: 13,
-  fullscreen: false,
-  drawMode: false,
-  course: COG,
-  follow: true,
-  showMenu: false,
-  extensionLine: EXTENSION_LINE_5_MIN,
-  showInstruments: true,
-  ais: {
-    enabled: false
-  },
-  worldBaseChart: true,
-  charts: [],
-  data: []
-}
-const settings = Atom(_.assign(defaultSettings, window.INITIAL_SETTINGS || {}))
 const drawObject = Atom({distance: 0, del: false})
 
 const connection = Connection({providers: settings.get().data, settings})
@@ -190,7 +174,7 @@ const Menu = ({settings}) => {
               onClick={toggleExtensionLine} />
           </Accordion>
           <Accordion header='Charts'>
-            <div>{settings.map('.charts').map(renderChartAttributions)}</div>
+            <div>{settings.map('.chartProviders').map(renderChartAttributions)}</div>
           </Accordion>
         </div>
         <div className='credits'>
@@ -210,7 +194,7 @@ function renderChartAttributions(charts) {
   }
   return (
     <ul className='charts'>
-      {_.map(charts, provider => {
+      {_.map(_.sortBy(charts, 'index'), provider => {
         return (
           <li className='charts-provider' key={provider.id || provider.name}>
             <p className='name'>{provider.name}</p>
@@ -251,7 +235,13 @@ const App = (
     <Controls settings={settings}/>
     <Menu settings={settings}/>
     <Instruments settings={settings} data={connection.selfData}/>
-    <Map connection={connection} settings={settings} drawObject={drawObject} />
+    {settings.view(L.prop('loadingChartProviders')).skipDuplicates().map(loading => {
+      if (loading) {
+        return <div className='charts-loading map-wrapper'><h2>Loading ...</h2></div>
+      } else {
+        return <Map connection={connection} settings={settings} drawObject={drawObject} />
+      }
+    })}
   </div>
 )
 

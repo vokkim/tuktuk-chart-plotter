@@ -41,7 +41,7 @@ function initMap(connection, settings, drawObject) {
   window.map = map
   initialSettings.worldBaseChart && addBasemap(map)
 
-  addCharts(map, initialSettings.charts)
+  addCharts(map, initialSettings.chartProviders)
   const vesselIcons = createVesselIcons(_.get(initialSettings.data, ['0', 'type']) === 'geolocation')
 
   const myVessel = Leaf.marker([0, 0], {icon: resolveIcon(vesselIcons, initialSettings.zoom), draggable: false, zIndexOffset: 990, rotationOrigin: 'center center', rotationAngle: 0})
@@ -235,46 +235,27 @@ function handleDrawPath({map, settings, drawObject}) {
     })
 }
 
-function addCharts(map, charts) {
-
-  function fetchSignalKCharts(provider) {
-    const url = `${provider.address}/signalk/v1/api/resources/charts`
-    return api.get({url}).flatMap(charts => {
-      return Bacon.fromArray(_.map(_.values(charts), chart => {
-        const tilemapUrl = provider.address + chart.tilemapUrl
-        const from = _.pick(chart, ['type', 'name', 'minzoon', 'maxzoom', 'center'])
-        return _.merge({tilemapUrl, minzoom: MIN_ZOOM, maxzoom: MAX_ZOOM, index: provider.index || 0}, from)
-      }))
-    })
-  }
-
-  const allProviders = Bacon.fromArray(charts)
-    .flatMap(provider => {
-      return provider.type === 'signalk' ? fetchSignalKCharts(provider) : Bacon.once(provider)
-    })
-    .fold([], _.concat)
-
-  allProviders.onValue(providers => {
-    _.each(providers, provider => {
-      if (!_.includes(['tilelayer'], provider.type)) {
-        console.error(`Unsupported chart format ${provider.format} for chart ${provider.name}`)
-        return
-      }
-      const pane = `chart-${provider.index}`
-      map.createPane(pane)
-      Leaf.tileLayer(provider.tilemapUrl, {detectRetina: true, maxNativeZoom: provider.maxzoom, minNativeZoom: provider.minzoom, pane}).addTo(map)
-    })
-
-    if (!_.isEmpty(providers)) {
-      const {center} = _.first(providers)
-      if (center && _.isArray(center) && center.length >= 2) {
-        map.panTo([center[1], center[0]])
-      }
+function addCharts(map, providers) {
+  _.each(providers, provider => {
+    if (!_.includes(['tilelayer'], provider.type)) {
+      console.error(`Unsupported chart format ${provider.format} for chart ${provider.name}`)
+      return
     }
+    if (!provider.tilemapUrl) {
+      console.error(`Missing tilemapUrl for chart ${provider.name}`)
+      return
+    }
+    const pane = `chart-${provider.index}`
+    map.createPane(pane)
+    Leaf.tileLayer(provider.tilemapUrl, {detectRetina: true, maxNativeZoom: provider.maxzoom, minNativeZoom: provider.minzoom, pane}).addTo(map)
   })
-  allProviders.onError(e => {
-    console.error(e)
-  })
+
+  if (!_.isEmpty(providers)) {
+    const {center} = _.first(providers)
+    if (center && _.isArray(center) && center.length >= 2) {
+      map.panTo([center[1], center[0]])
+    }
+  }
 }
 
 function addBasemap(map) {
