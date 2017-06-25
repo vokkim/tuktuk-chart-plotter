@@ -44,6 +44,9 @@ body {
   .body-font();
   color: @lightFontColor;
 }
+p {
+  margin: 10px 0;
+}
 :focus {
     outline: 0;
     /* or */
@@ -427,5 +430,13 @@ body {
     padding: 20px 10px;
     color: #5151b3;
     text-decoration: none;
+  }
+}
+
+.charts-provider {
+  margin: 20px;
+
+  .description, .levels {
+    color: @labelFontColor;
   }
 }

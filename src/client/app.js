@@ -189,6 +189,9 @@ const Menu = ({settings}) => {
               valueLabel={settings.view(L.prop('extensionLine'))}
               onClick={toggleExtensionLine} />
           </Accordion>
+          <Accordion header='Charts'>
+            <div>{settings.map('.charts').map(renderChartAttributions)}</div>
+          </Accordion>
         </div>
         <div className='credits'>
           <div className='github-link'>
@@ -198,6 +201,25 @@ const Menu = ({settings}) => {
         </div>
       </div>
     </div>
+  )
+}
+
+function renderChartAttributions(charts) {
+  if (_.isEmpty(charts)) {
+    return <div>No charts</div>
+  }
+  return (
+    <ul className='charts'>
+      {_.map(charts, provider => {
+        return (
+          <li className='charts-provider' key={provider.id || provider.name}>
+            <p className='name'>{provider.name}</p>
+            {provider.description && <p className='description'>{provider.description}</p>}
+            {provider.minzoom && provider.maxzoom && <p className='levels'>Levels: {provider.minzoom} - {provider.maxzoom}</p>}
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 
