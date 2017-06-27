@@ -4,6 +4,7 @@ import Atom from 'bacon.atom'
 import {render} from 'react-dom'
 import numeral from 'numeral'
 import classNames from 'classnames'
+import DragSortableList from 'react-drag-sortable'
 import Bacon from 'baconjs'
 import _ from 'lodash'
 import {COG, HDG, MAX_ZOOM, MIN_ZOOM, EXTENSION_LINE_OFF, EXTENSION_LINE_2_MIN, EXTENSION_LINE_5_MIN, EXTENSION_LINE_10_MIN} from './enums'
@@ -70,15 +71,21 @@ const Instruments = ({settings, data}) => {
   return (
     <div className={settings.map(v => classNames('right-bar-instruments', {visible: v.showInstruments, hidden: !v.showInstruments}))}>
       <div className='wrapper'>
-        {_.map(InstrumentConfig, (config, key) =>
-          <Instrument
-          key={key}
-          value={data.map(v => v[config.dataKey]).skipDuplicates().map(config.transformFn)}
-          className={config.className}
-          format={config.format}
-          title={config.title}
-          unit={config.unit} />
-        )}
+        {settings.map('.instruments').skipDuplicates().map(instruments => {
+          return _.map(instruments, key => {
+            const config = InstrumentConfig[key]
+            if (!config) {
+              return null
+            }
+            return <Instrument
+              key={key}
+              value={data.map(v => v[config.dataKey]).skipDuplicates().map(config.transformFn)}
+              className={config.className}
+              format={config.format}
+              title={config.title}
+              unit={config.unit} />
+          })
+        })}
       </div>
     </div>
   )
@@ -128,10 +135,13 @@ const TopBarButton = ({enabled, className, iconClass, onClick}) => {
 }
 
 const MenuCheckbox = ({checked, label, className, onClick}) => {
+  const classname = checked.subscribe ?
+    checked.map(v => v ? 'icon-checkbox-checked' : 'icon-checkbox-unchecked') :
+    checked ? 'icon-checkbox-checked' : 'icon-checkbox-unchecked'
   return (
     <button className={classNames('menu-checkbox', className)} onClick={onClick}>
       <span>{label}</span>
-      <i className={checked.map(v => v ? 'icon-checkbox-checked' : 'icon-checkbox-unchecked')} />
+      <i className={classname} />
     </button>
   )
 }
@@ -173,6 +183,9 @@ const Menu = ({settings}) => {
               valueLabel={settings.view(L.prop('extensionLine'))}
               onClick={toggleExtensionLine} />
           </Accordion>
+          <Accordion header='Instruments'>
+            <InstrumentSettings instrumentSettings={settings.view(L.prop('instruments'))} />
+          </Accordion>
           <Accordion header='Charts'>
             <div>{settings.map('.chartProviders').map(renderChartAttributions)}</div>
           </Accordion>
@@ -186,6 +199,66 @@ const Menu = ({settings}) => {
       </div>
     </div>
   )
+}
+
+class InstrumentSettings extends React.Component {
+  componentWillMount() {
+    const allConfigs = _.keys(InstrumentConfig)
+    const initialInstruments = this.props.instrumentSettings.get()
+    const initialSortOrder = _.sortBy(allConfigs, key => {
+      const i = _.indexOf(initialInstruments, key)
+      return i === -1 ? Number.MAX_VALUE : i
+    })
+    this._internalSort = Atom(initialSortOrder)
+    this.unsub = this._internalSort.onValue(sortOrder => {
+      this.props.instrumentSettings.modify(instruments =>
+        _.sortBy(instruments, key => _.indexOf(sortOrder, key))
+      )
+    })
+  }
+  componentWillUnmount() {
+    this.unsub && this.unsub()
+  }
+  render() {
+    const {_internalSort} = this
+    const {instrumentSettings} = this.props
+    const allConfigs = _.keys(InstrumentConfig)
+    const instruments = instrumentSettings.map(instruments => {
+      const sortOrder = _internalSort.get()
+      return _.map(sortOrder, key => {
+        const config = InstrumentConfig[key]
+        const selected = _.includes(instruments, key)
+        const content =
+          <MenuCheckbox
+            key={key}
+            label={config.title}
+            checked={selected}
+            onClick={() => instrumentSettings.modify(instruments => {
+              if (selected) {
+                return _.filter(instruments, k => k !== key)
+              } else {
+                return _.filter(sortOrder, k => k === key || _.includes(instruments, k))
+              }
+            })}/>
+        return {content}
+      })
+    })
+
+    function onSort(sortedElements) {
+      const sortOrder = _(sortedElements)
+        .sortBy(e => e.rank)
+        .map(e => e.content.key)
+        .value()
+      _internalSort.set(sortOrder)
+    }
+    return (
+      <div className='instrument-settings'>
+        {instruments.map(list =>
+          <DragSortableList items={list} onSort={onSort} type='vertical'/>
+        )}
+      </div>
+    )
+  }
 }
 
 function renderChartAttributions(charts) {

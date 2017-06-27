@@ -122,7 +122,6 @@ p {
     transition: width 0.25s;
     .wrapper {
       width: @menuWidth;
-      overflow: hidden;
     }
     &.visible {
       width: @menuWidth;
@@ -132,10 +131,6 @@ p {
     &.visible {
       left: 0;
       width: 100%;
-    }
-    .wrapper {
-      display: flex;
-      flex-wrap: wrap;
     }
   }
 }
@@ -448,5 +443,11 @@ p {
     color: lighten(@darkBg, 50%);
     font-size: 500%;
     margin-top: 30%;
+  }
+}
+
+.instrument-settings {
+  .placeholder {
+    opacity: 0.3;
   }
 }

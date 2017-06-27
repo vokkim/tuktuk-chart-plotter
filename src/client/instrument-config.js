@@ -70,7 +70,7 @@ const InstrumentConfigs = {
     dataKey: 'environment.wind.angleTrueWater',
     transformFn: toDegrees,
     className: 'awa',
-    title: 'AWA',
+    title: 'AWA (STW)',
     format: '0',
     unit: '°'
   }

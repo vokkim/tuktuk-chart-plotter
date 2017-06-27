@@ -3,6 +3,7 @@ import Bacon from 'baconjs'
 import _ from 'lodash'
 import api from './api'
 import * as L from 'partial.lenses'
+import InstrumentConfig from './instrument-config'
 import {COG, EXTENSION_LINE_5_MIN, MIN_ZOOM, MAX_ZOOM} from './enums'
 
 const defaultSettings = {
@@ -21,6 +22,7 @@ const defaultSettings = {
   chartProviders: [],
   loadingChartProviders: true,
   data: [],
+  instruments: _.keys(InstrumentConfig)
 }
 
 const charts = _.get(window.INITIAL_SETTINGS, 'charts', [])
