@@ -238,7 +238,7 @@ function handleDrawPath({map, settings, drawObject}) {
 function addCharts(map, providers) {
   _.each(providers, provider => {
     if (!_.includes(['tilelayer'], provider.type)) {
-      console.error(`Unsupported chart format ${provider.format} for chart ${provider.name}`)
+      console.error(`Unsupported chart type ${provider.type} for chart ${provider.name}`)
       return
     }
     if (!provider.tilemapUrl) {
