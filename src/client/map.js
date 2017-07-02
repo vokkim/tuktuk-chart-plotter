@@ -247,15 +247,14 @@ function addCharts(map, providers) {
     }
     const pane = `chart-${provider.index}`
     map.createPane(pane)
-    Leaf.tileLayer(provider.tilemapUrl, {detectRetina: true, maxNativeZoom: provider.maxzoom, minNativeZoom: provider.minzoom, pane}).addTo(map)
-  })
-
-  if (!_.isEmpty(providers)) {
-    const {center} = _.first(providers)
-    if (center && _.isArray(center) && center.length >= 2) {
-      map.panTo([center[1], center[0]])
+    const bounds = parseChartBounds(provider)
+    Leaf.tileLayer(provider.tilemapUrl, {detectRetina: true, bounds, maxNativeZoom: provider.maxzoom, minNativeZoom: provider.minzoom, pane}).addTo(map)
+    if (_.isArray(provider.center) && provider.center.length == 2) {
+      map.panTo([provider.center[1], provider.center[0]])
+    } else if (bounds) {
+      map.fitBounds(bounds)
     }
-  }
+  })
 }
 
 function addBasemap(map) {
@@ -328,6 +327,23 @@ function resolveIcon(icons, zoom) {
   } else {
     return icons.large
   }
+}
+
+function parseChartBounds(provider) {
+  if (!provider.bounds) {
+    return undefined
+  }
+  if (!_.isArray(provider.bounds) || provider.bounds.length !== 4) {
+    throw new Error(`Unrecognized bounds format: ` + JSON.stringify(provider.bounds))
+  }
+
+  const corner1 = Leaf.latLng(provider.bounds[1], provider.bounds[0])
+  const corner2 = Leaf.latLng(provider.bounds[3], provider.bounds[2])
+  const bounds = Leaf.latLngBounds(corner1, corner2)
+  if (!bounds.isValid()) {
+    throw new Error(`Invalid bounds: ` + JSON.stringify(provider.bounds))
+  }
+  return bounds
 }
 
 module.exports = Map

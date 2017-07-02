@@ -49,8 +49,10 @@ Exaple config:
       "maxzoom": 15,
       "minzoom": 4,
       "name": "liikennevirasto_rannikkokartat_public_15_4",
+      "description": "Lähde: Liikennevirasto. Ei navigointikäyttöön. Ei täytä virallisen merikartan vaatimuksia."
       "tilemapUrl": "/charts/liikennevirasto_rannikkokartat_public_15_4/{z}/{x}/{y}",
-      "center": [23.4942626953125, 62.746653958706545, 9]
+      "bounds": [19.105224609375, 59.645540251443215, 27.88330078125, 65.84776766596988],
+      "center": [24.805, 60.0888]
     },
     {
       "index": 1,

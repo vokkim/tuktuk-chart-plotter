@@ -29,11 +29,12 @@ const charts = _.get(window.INITIAL_SETTINGS, 'charts', [])
 const settings = Atom(_.assign(defaultSettings, _.omit(window.INITIAL_SETTINGS, ['charts']) || {}))
 
 function fetchSignalKCharts(provider) {
-  const url = `${provider.address}/signalk/v1/api/resources/charts`
+  const address = parseChartProviderAddress(provider.address)
+  const url = `${address}/signalk/v1/api/resources/charts`
   return api.get({url}).flatMap(charts => {
     return Bacon.fromArray(_.map(_.values(charts), chart => {
-      const tilemapUrl = provider.address + chart.tilemapUrl
-      const from = _.pick(chart, ['type', 'name', 'minzoon', 'maxzoom', 'center', 'description'])
+      const tilemapUrl = address + chart.tilemapUrl
+      const from = _.pick(chart, ['type', 'name', 'minzoom', 'maxzoom', 'center', 'description', 'format', 'bounds'])
       return _.merge({id: provider.identifier, tilemapUrl, minzoom: MIN_ZOOM, maxzoom: MAX_ZOOM, index: provider.index || 0}, from)
     }))
   })
@@ -54,6 +55,18 @@ chartProviders.onError(e => {
   console.error(`Error fetching chart providers`)
   console.error(e)
 })
+
+function parseChartProviderAddress(address) {
+  if (_.isEmpty(address)) {
+    throw `Empty chart provider address!`
+  }
+  if (_.isEmpty(address.split(':')[0])) {
+    // Relative address such as ':80'
+    return `${window.location.protocol}//${window.location.hostname}:${address.split(':')[1]}`
+  } else {
+    return address
+  }
+}
 
 module.exports = {
   settings

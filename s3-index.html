@@ -20,7 +20,8 @@
         name: 'Rannikkokartat',
         description: 'Lähde: Liikennevirasto. Ei navigointikäyttöön. Ei täytä virallisen merikartan vaatimuksia.',
         tilemapUrl: 'https://rannikko.merikartat.space/v1/{z}/{x}/{y}.png',
-        center: [24.805, 60.0888, 9]
+        bounds: [19.105224609375, 59.645540251443215, 27.88330078125, 65.84776766596988],
+        center: [24.805, 60.0888]
       },{
         index: 1,
         type: 'tilelayer',
@@ -28,8 +29,7 @@
         minzoom: 4,
         name: 'Wikimedia Maps',
         description: '© OpenStreetMap contributors',
-        tilemapUrl: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
-        center: [24.805, 60.0888, 9]
+        tilemapUrl: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png'
       }],
       zoom: 11,
       showInstruments: false,
