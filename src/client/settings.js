@@ -1,11 +1,12 @@
 import Atom from 'bacon.atom'
 import Bacon from 'baconjs'
+import Store from 'store'
 import _ from 'lodash'
 import api from './api'
 import * as L from 'partial.lenses'
 import InstrumentConfig from './instrument-config'
 import {COG, EXTENSION_LINE_5_MIN, MIN_ZOOM, MAX_ZOOM} from './enums'
-
+const LOCAL_STORAGE_KEY = 'plotter-settings'
 const defaultSettings = {
   zoom: 13,
   fullscreen: false,
@@ -25,8 +26,10 @@ const defaultSettings = {
   instruments: _.keys(InstrumentConfig)
 }
 
+const fromLocalStorage = Store.get(LOCAL_STORAGE_KEY) || {}
+
 const charts = _.get(window.INITIAL_SETTINGS, 'charts', [])
-const settings = Atom(_.assign(defaultSettings, _.omit(window.INITIAL_SETTINGS, ['charts']) || {}))
+const settings = Atom(_.assign(defaultSettings, _.omit(window.INITIAL_SETTINGS, ['charts']) || {}, fromLocalStorage))
 
 function fetchSignalKCharts(provider) {
   const address = parseChartProviderAddress(provider.address)
@@ -68,6 +71,16 @@ function parseChartProviderAddress(address) {
   }
 }
 
+function clearSettingsFromLocalStorage() {
+  Store.remove(LOCAL_STORAGE_KEY)
+}
+
+settings
+  .map(v => _.omit(v, ['chartProviders', 'drawMode', 'data', 'loadingChartProviders', 'zoom']))
+  .skipDuplicates((a,b) => JSON.stringify(a) === JSON.stringify(b))
+  .onValue(v => Store.set(LOCAL_STORAGE_KEY, v))
+
 module.exports = {
-  settings
+  settings,
+  clearSettingsFromLocalStorage
 }

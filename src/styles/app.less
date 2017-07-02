@@ -52,6 +52,17 @@ p {
     /* or */
     outline: none;
 }
+.button {
+  border: none;
+  background: lighten(@darkBg, 25%);
+  padding: 15px;
+  color: @lightFontColor;
+  font-size: 16px;
+  transition: 0.2s background;
+  &:hover {
+    background: lighten(@darkBg, 30%);
+  }
+}
 .top-bar-controls {
   position: absolute;
   background: @darkBg;
@@ -339,6 +350,10 @@ p {
   &.disabled {
     max-width: 0;
   }
+}
+
+.reset-settings {
+  margin: 10px;
 }
 
 .aisTooltip {

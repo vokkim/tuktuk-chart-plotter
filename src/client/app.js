@@ -13,7 +13,7 @@ import Connection from './data-connection'
 import {toDegrees, toNauticalMiles} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
-import {settings} from './settings'
+import {settings, clearSettingsFromLocalStorage} from './settings'
 numeral.nullFormat('N/A')
 
 const drawObject = Atom({distance: 0, del: false})
@@ -189,6 +189,14 @@ const Menu = ({settings}) => {
           <Accordion header='Charts'>
             <div>{settings.map('.chartProviders').map(renderChartAttributions)}</div>
           </Accordion>
+          <button
+            className='button reset-settings'
+            onClick={() => {
+              clearSettingsFromLocalStorage()
+              window.location.reload()
+            }}>
+            Reset settings
+          </button>
         </div>
         <div className='credits'>
           <div className='github-link'>
