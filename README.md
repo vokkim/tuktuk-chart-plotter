@@ -106,7 +106,7 @@ Other charts in `client-config.json` are of type `tilelayer`:
     "maxzoom": 15,
     "minzoom": 1,
     "name": "OpenStreetMap",
-    "description": "OSM charts."
+    "description": "OSM charts.",
     "path": "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
   }
 ]
