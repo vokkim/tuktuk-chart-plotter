@@ -20,7 +20,7 @@ api.get('/charts/', (req, res) => {
 
   providers.onValue(providers => {
     const sanitized = _.map(_.values(providers), provider => {
-      return _.merge(_.omit(provider, ['db']), {path: `/charts/${provider.name}/{z}/{x}/{y}`})
+      return _.merge(_.omit(provider, ['db']), {tilemapUrl: `/charts/${provider.name}/{z}/{x}/{y}`, type: 'tilelayer'})
     })
     res.send(sanitized)
   })

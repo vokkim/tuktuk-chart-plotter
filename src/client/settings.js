@@ -31,21 +31,16 @@ const fromLocalStorage = Store.get(LOCAL_STORAGE_KEY) || {}
 const charts = _.get(window.INITIAL_SETTINGS, 'charts', [])
 const settings = Atom(_.assign(defaultSettings, _.omit(window.INITIAL_SETTINGS, ['charts']) || {}, fromLocalStorage))
 
-function fetchSignalKCharts(provider) {
-  const address = parseChartProviderAddress(provider.address)
-  const url = `${address}/signalk/v1/api/resources/charts`
-  return api.get({url}).flatMap(charts => {
-    return Bacon.fromArray(_.map(_.values(charts), chart => {
-      const tilemapUrl = address + chart.tilemapUrl
-      const from = _.pick(chart, ['type', 'name', 'minzoom', 'maxzoom', 'center', 'description', 'format', 'bounds'])
-      return _.merge({id: provider.identifier, tilemapUrl, minzoom: MIN_ZOOM, maxzoom: MAX_ZOOM, index: provider.index || 0}, from)
-    }))
-  })
-}
-
 const chartProviders = Bacon.fromArray(charts)
   .flatMap(provider => {
-    return provider.type === 'signalk' ? fetchSignalKCharts(provider) : Bacon.once(provider)
+    switch (provider.type) {
+      case 'local':
+        return fetchLocalCharts(provider)
+      case 'signalk':
+        return fetchSignalKCharts(provider)
+      default:
+        Bacon.once(provider)
+    }
   })
   .fold([], _.concat)
 
@@ -58,6 +53,33 @@ chartProviders.onError(e => {
   console.error(`Error fetching chart providers`)
   console.error(e)
 })
+
+settings
+  .map(v => _.omit(v, ['chartProviders', 'drawMode', 'data', 'loadingChartProviders', 'zoom']))
+  .skipDuplicates((a,b) => JSON.stringify(a) === JSON.stringify(b))
+  .onValue(v => Store.set(LOCAL_STORAGE_KEY, v))
+
+function fetchLocalCharts(provider) {
+  const url = `/charts/`
+  return api.get({url}).flatMap(charts => {
+    return Bacon.fromArray(_.map(_.values(charts), chart => {
+      const from = _.pick(chart, ['tilemapUrl', 'index', 'type', 'name', 'minzoom', 'maxzoom', 'center', 'description', 'format', 'bounds'])
+      return _.merge({id: chart.name, index: provider.index || 0}, from)
+    }))
+  })
+}
+
+function fetchSignalKCharts(provider) {
+  const address = parseChartProviderAddress(provider.address)
+  const url = `${address}/signalk/v1/api/resources/charts`
+  return api.get({url}).flatMap(charts => {
+    return Bacon.fromArray(_.map(_.values(charts), chart => {
+      const tilemapUrl = address + chart.tilemapUrl
+      const from = _.pick(chart, ['type', 'name', 'minzoom', 'maxzoom', 'center', 'description', 'format', 'bounds'])
+      return _.merge({id: chart.name, tilemapUrl, minzoom: MIN_ZOOM, maxzoom: MAX_ZOOM, index: provider.index || 0}, from)
+    }))
+  })
+}
 
 function parseChartProviderAddress(address) {
   if (_.isEmpty(address)) {
@@ -74,11 +96,6 @@ function parseChartProviderAddress(address) {
 function clearSettingsFromLocalStorage() {
   Store.remove(LOCAL_STORAGE_KEY)
 }
-
-settings
-  .map(v => _.omit(v, ['chartProviders', 'drawMode', 'data', 'loadingChartProviders', 'zoom']))
-  .skipDuplicates((a,b) => JSON.stringify(a) === JSON.stringify(b))
-  .onValue(v => Store.set(LOCAL_STORAGE_KEY, v))
 
 module.exports = {
   settings,
