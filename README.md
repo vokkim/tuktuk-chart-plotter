@@ -16,6 +16,7 @@ Start server:
 
 Plotter accessible at http://localhost:4999/
 
+You should also have a [signalk-server-node](https://github.com/SignalK/signalk-server-node) running.
 
 ## Environment variables
 
@@ -29,7 +30,7 @@ Local chart providers can be found from `http://localhost:4999/charts/`
 
 # Client config
 
-Exaple config:
+Example config:
 ``` javascript
 {
   "data": [
@@ -49,7 +50,7 @@ Exaple config:
       "maxzoom": 15,
       "minzoom": 4,
       "name": "liikennevirasto_rannikkokartat_public_15_4",
-      "description": "Lähde: Liikennevirasto. Ei navigointikäyttöön. Ei täytä virallisen merikartan vaatimuksia."
+      "description": "Lähde: Liikennevirasto. Ei navigointikäyttöön. Ei täytä virallisen merikartan vaatimuksia.",
       "tilemapUrl": "/charts/liikennevirasto_rannikkokartat_public_15_4/{z}/{x}/{y}",
       "bounds": [19.105224609375, 59.645540251443215, 27.88330078125, 65.84776766596988],
       "center": [24.805, 60.0888]
