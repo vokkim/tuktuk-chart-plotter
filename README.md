@@ -16,6 +16,7 @@ Start server:
 
 Plotter accessible at http://localhost:4999/
 
+You should also have a [signalk-server-node](https://github.com/SignalK/signalk-server-node) running.
 
 ## Environment variables
 
