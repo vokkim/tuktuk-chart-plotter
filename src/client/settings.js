@@ -39,7 +39,7 @@ const chartProviders = Bacon.fromArray(charts)
       case 'signalk':
         return fetchSignalKCharts(provider)
       default:
-        Bacon.once(provider)
+        return Bacon.once(provider)
     }
   })
   .fold([], _.concat)
