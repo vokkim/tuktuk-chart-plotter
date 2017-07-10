@@ -200,7 +200,7 @@ const Menu = ({settings}) => {
         </div>
         <div className='credits'>
           <div className='github-link'>
-            <img src='/public/GitHub-Mark-64px.png' />
+            <img src='public/GitHub-Mark-64px.png' />
             <a href='https://github.com/vokkim/tuktuk-chart-plotter'>https://github.com/vokkim/tuktuk-chart-plotter</a>
           </div>
         </div>
