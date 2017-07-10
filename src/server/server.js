@@ -45,8 +45,9 @@ function createIndexHtml({config}) {
 <head>
   <title>Plotteri</title>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="public/bundle.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body>
   <script type="text/javascript">
