@@ -71,6 +71,10 @@ p {
   right: 0;
   display: flex;
 
+  > div {
+    height: 100%;
+  }
+
   @media @tablet-and-desktop {
     height: @desktopTopBarHeight;
     .top-bar-controls-left {
@@ -246,6 +250,7 @@ p {
 .generate-panes(10);
 .zoom-buttons {
   display: flex;
+  height: 100%;
   @media @mobile {
     position: absolute;
     top: @mobileTopBarHeight;
