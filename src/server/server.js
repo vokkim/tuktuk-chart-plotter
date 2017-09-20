@@ -7,8 +7,6 @@ import chartRoutes from './chart-routes'
 
 const app = express()
 
-app.use('/public', express.static(path.join(__dirname, '../../public')))
-
 app.get('/', function (req, res) {
   const clientConfig = Bacon.fromNodeCallback(fs, 'readFile', settings.clientConfigFile)
     .flatMap(config => {
@@ -32,6 +30,9 @@ app.get('/', function (req, res) {
   })
 })
 
+app.use('/', express.static(path.join(__dirname, '../../public')))
+
+
 app.listen(settings.port, function () {
   console.log(`Listening ${settings.port}`)
 })
@@ -45,7 +46,7 @@ function createIndexHtml({config}) {
 <head>
   <title>Plotteri</title>
   <meta charset="utf-8" />
-  <link rel="stylesheet" href="public/bundle.css"/>
+  <link rel="stylesheet" href="bundle.css"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
   <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
@@ -54,7 +55,7 @@ function createIndexHtml({config}) {
     window.INITIAL_SETTINGS = ${JSON.stringify(config)};
   </script>
   <div id="app"></div>
-  <script src="public/bundle.js"></script>
+  <script src="bundle.js"></script>
 </body>
 </html>`
 }
