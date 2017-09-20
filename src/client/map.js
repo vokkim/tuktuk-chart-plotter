@@ -138,7 +138,7 @@ function initMap(connection, settings, drawObject) {
 function handleAisTargets({map, aisData, settings}) {
   let aisMarkers = {}
   const aisTargetMarker = Leaf.icon({
-    iconUrl: 'public/ais-target-medium.png',
+    iconUrl: 'ais-target-medium.png',
     iconSize: [20, 30],
     iconAnchor: [10, 15]
   })
@@ -185,7 +185,7 @@ function handleAisTargets({map, aisData, settings}) {
 
 function handleDrawPath({map, settings, drawObject}) {
   const pathMarker = Leaf.icon({
-    iconUrl: 'public/path-marker.png',
+    iconUrl: 'path-marker.png',
     iconSize: [20, 20],
     iconAnchor: [10, 10]
   })
@@ -265,7 +265,7 @@ function addBasemap(map) {
     fillColor: '#fafafa',
     fillOpacity: 1
   }
-  const baseMap = api.get({url: 'public/world-base.geo.json'})
+  const baseMap = api.get({url: 'world-base.geo.json'})
   baseMap.onError(e => console.log(`Unable to fetch base map`, e))
   baseMap.onValue(worldBaseGeoJSON => Leaf.geoJson(worldBaseGeoJSON, {clickable: false, style: basemapStyle, pane: 'basemap'}).addTo(map))
 }
@@ -293,26 +293,26 @@ function calculateExtensionLine(position, course, speed, extensionLineSetting) {
 function createVesselIcons(shouldUseRoundIcon) {
   if (shouldUseRoundIcon) {
     const icon = Leaf.icon({
-      iconUrl: 'public/vessel-marker-round.png',
+      iconUrl: 'vessel-marker-round.png',
       iconSize: [30, 30],
       iconAnchor: [15, 15]
     })
     return {large: icon, medium: icon, small: icon}
   }
   const large = Leaf.icon({
-    iconUrl: 'public/vessel-large.png',
+    iconUrl: 'vessel-large.png',
     iconSize: [20, 50],
     iconAnchor: [10, 25]
   })
 
   const medium = Leaf.icon({
-    iconUrl: 'public/vessel-medium.png',
+    iconUrl: 'vessel-medium.png',
     iconSize: [16, 40],
     iconAnchor: [8, 20]
   })
 
   const small = Leaf.icon({
-    iconUrl: 'public/vessel-small.png',
+    iconUrl: 'vessel-small.png',
     iconSize: [12, 30],
     iconAnchor: [6, 15]
   })
