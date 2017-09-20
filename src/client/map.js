@@ -273,13 +273,13 @@ const trackColors = [
   "#a262a6",
 ]
 
-function renderTracks(map, tracks) {
+function renderTracks(map, featureCollection) {
   geoJSONLayers.forEach(layer => map.removeLayer(layer))
   geoJSONLayers = []
-  tracks.forEach(({date, route}, i) => {
-    const dayIndex = (new Date(date).getTime() / 86400000).toFixed()
+  featureCollection.features.forEach((feature, i) => {
+    const dayIndex = (new Date(feature.properties.starttime).getTime() / 86400000).toFixed()
     const basicStyle = {color: trackColors[dayIndex % trackColors.length]}
-    const geoJSONLayer = Leaf.geoJSON(route, {style: basicStyle})
+    const geoJSONLayer = Leaf.geoJSON(feature, {style: basicStyle})
     geoJSONLayer.on('click', e => geoJSONLayer.setStyle(_.assign({}, basicStyle, {weight: 6})))
     geoJSONLayers.push(geoJSONLayer)
     geoJSONLayer.addTo(map)
