@@ -317,7 +317,7 @@ const App = (
   <div>
     <Controls settings={settings}/>
     <Menu settings={settings}/>
-    <Instruments settings={settings} data={connection.selfData}/>
+    <Instruments settings={settings} data={dataConnection.selfData}/>
     {settings.view(L.prop('loadingChartProviders')).skipDuplicates().map(loading => {
       if (loading) {
         return <div className='charts-loading map-wrapper'><h2>Loading ...</h2></div>
