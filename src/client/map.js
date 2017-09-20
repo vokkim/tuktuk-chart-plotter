@@ -172,10 +172,29 @@ function handleAisTargets({map, aisData, settings}) {
         aisMarkers[k] = vesselMarker
       }
       if (aisMarkers[k]) {
+        console.log(JSON.stringify(v))
         const name = _.get(v, 'name.value', 'Unknown')
         const formattedSog = numeral(sog).format('0.0')
         const formattedCog = numeral(course).format('0')
-        const tooltip = `<div class='name'>${name}</div><div>SOG: ${formattedSog} kn</div><div>COG: ${formattedCog}</div>`
+        var tooltip = `<div class='name'>${name}</div><div>SOG: ${formattedSog} kn</div><div>COG: ${formattedCog}</div>`
+        const draft = _.get(v, ['design.draft', 'value', 'maximum'])
+        const beam = _.get(v, ['design.beam', 'value'])
+        const length = _.get(v, ['design.length', 'value', 'overall'])
+        const state = _.get(v, ['navigation.state', 'value'])        
+
+        if ( state ) {
+          tooltip += `<div>State: ` + state + `</div>`
+        }
+        if ( length ) {
+          tooltip += `<div>Length: ` + numeral(length).format(0.0) + ` m</div>`
+        }
+        if ( beam ) {
+          tooltip += `<div>Beam: ` + numeral(beam).format(0.0) + ` m</div>`
+        }
+        if ( draft ) {
+          tooltip += `<div>Draft: ` + numeral(draft).format(0.0) + ` m</div>`
+        }
+        console.log('tooltip: ' + tooltip)
         aisMarkers[k].bindTooltip(tooltip, {className: 'aisTooltip'})
         aisMarkers[k]._updatedAt = Date.now()
       }
