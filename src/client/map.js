@@ -5,6 +5,7 @@ import classNames from 'classnames'
 import _ from 'lodash'
 import numeral from 'numeral'
 import * as Leaf from 'leaflet'
+import {scaleLinear} from 'd3-scale'
 import {computeDestinationPoint} from 'geolib'
 import LeafletRotatedMarker from 'leaflet-rotatedmarker'
 import api from './api'
@@ -266,25 +267,97 @@ function addCharts(map, providers) {
   })
 }
 
-let geoJSONLayers = []
+let trackLayers = []
 const trackColors = [
   "#4c79a6",
   "#46a65b",
   "#a262a6",
 ]
 
-function renderTracks(map, featureCollection) {
-  geoJSONLayers.forEach(layer => map.removeLayer(layer))
-  geoJSONLayers = []
-  featureCollection.features.forEach((feature, i) => {
-    const dayIndex = (new Date(feature.properties.starttime).getTime() / 86400000).toFixed()
-    const basicStyle = {color: trackColors[dayIndex % trackColors.length]}
-    const geoJSONLayer = Leaf.geoJSON(feature, {style: basicStyle})
-    geoJSONLayer.on('click', e => geoJSONLayer.setStyle(_.assign({}, basicStyle, {weight: 6})))
-    geoJSONLayers.push(geoJSONLayer)
-    geoJSONLayer.addTo(map)
-  })
+function renderTracks (map, featureCollection) {
+  trackLayers.forEach(layer => map.removeLayer(layer))
+  trackLayers = featureCollection.features.reduce((acc, feature, i) => {
+    const dayIndex = feature.properties.starttime
+      ? (new Date(feature.properties.starttime).getTime() / 86400000).toFixed()
+      : 0
+    const basicStyle = {
+      color: trackColors[dayIndex % trackColors.length],
+      stroke: 8
+    }
+    const geoJSONLayer = Leaf.geoJSON(feature, { style: basicStyle })
+    geoJSONLayer.on('click', e =>
+      geoJSONLayer.setStyle(_.assign({}, basicStyle, { weight: 6 }))
+    )
+    acc.push(geoJSONLayer)
+
+    featureCollection.properties.dataPaths && featureCollection.properties.dataPaths.forEach((path, i) => {
+      acc.push(toDataLayer(feature, path, i, featureCollection.properties.dataPaths.length))
+    })
+    return acc
+  }, [])
+  trackLayers.forEach(layer => layer.addTo(map))
 }
+
+
+
+
+function toDataLayer (feature, path, pathIndex, pathsCount) {
+  const valueColor = scaleLinear()
+    .domain([2, 5, 10, 25])
+    .range(['red', 'yellow', 'green', 'blue'])
+  const circleStyles = [
+    {
+      radius: 4,
+      fillOpacity: 1,
+      fillColor: valueColor,
+      color: () => '#000',
+      opacity: 0
+    },
+    {
+      radius: 8,
+      fillOpacity: 0,
+      fillColor: () => '#000',
+      color: valueColor,
+      opacity: 0.6
+    }
+  ]
+
+  const points = []
+
+  const circleStyle =
+    circleStyles[(pathIndex + pathsCount - 1) % circleStyles.length]
+  // [lat, lon, elev, timestamp, ...]
+  const dataIndex = pathIndex + 4
+  feature.geometry.coordinates.forEach(line => {
+    line.forEach(coordinates => {
+      if (coordinates.length >= dataIndex) {
+        const circleMarker = Leaf.circleMarker(
+          Leaf.latLng(coordinates[1], coordinates[0]),
+          {
+            radius: circleStyle.radius,
+            weight: 5,
+            fillOpacity: circleStyle.fillOpacity,
+            fillColor: circleStyle.fillColor(coordinates[dataIndex]),
+            color: circleStyle.color(coordinates[dataIndex]),
+            opacity: circleStyle.opacity
+          }
+        )
+        circleMarker.bindPopup(
+          `${path} ${coordinates[dataIndex]} \n${new Date(coordinates[3])}`
+        )
+        circleMarker.on('mouseover', e => {
+          circleMarker.openPopup()
+        })
+
+        points.push(circleMarker)
+      }
+    })
+  })
+  return Leaf.layerGroup(points)
+}
+
+
+
 
 function addBasemap(map) {
   map.createPane('basemap')
