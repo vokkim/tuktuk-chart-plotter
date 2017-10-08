@@ -3,3 +3,4 @@ public/bundle.js.map
 .bundle.css
 npm-debug.*
 client-config.json
+.idea

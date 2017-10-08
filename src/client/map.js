@@ -5,6 +5,7 @@ import classNames from 'classnames'
 import _ from 'lodash'
 import numeral from 'numeral'
 import * as Leaf from 'leaflet'
+import {scaleLinear} from 'd3-scale'
 import {computeDestinationPoint} from 'geolib'
 import LeafletRotatedMarker from 'leaflet-rotatedmarker'
 import api from './api'
@@ -13,7 +14,7 @@ import {COG, HDG, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS, EXTENSION_LINE_OFF, EXTENSION
 
 class Map extends React.Component {
   componentDidMount() {
-    initMap(this.props.connection, this.props.settings, this.props.drawObject)
+    initMap(this.props.dataConnection, this.props.trackConnection, this.props.settings, this.props.drawObject)
   }
   render() {
     const {settings} = this.props
@@ -26,7 +27,7 @@ class Map extends React.Component {
   }
 }
 
-function initMap(connection, settings, drawObject) {
+function initMap(dataConnection, trackConnection, settings, drawObject) {
   console.log('Init map')
   const initialSettings = settings.get()
   const map = Leaf.map('map', {
@@ -52,7 +53,7 @@ function initMap(connection, settings, drawObject) {
   pointer.addTo(map)
 
   const vesselData = Bacon.combineTemplate({
-    vesselData: connection.selfData,
+    vesselData: dataConnection.selfData,
     settings
   })
   vesselData.onValue(({vesselData, settings}) => {
@@ -86,11 +87,12 @@ function initMap(connection, settings, drawObject) {
     }
   })
 
-  handleAisTargets({map, aisData: connection.aisData, settings})
+  handleAisTargets({map, aisData: dataConnection.aisData, settings})
   handleDrawPath({map, settings, drawObject})
   handleMapZoom()
   handleDragAndFollow()
   handleInstrumentsToggle()
+  showTracksOnMapMove()
   function handleMapZoom() {
     settings.map('.zoom').skipDuplicates().onValue(zoom => {
       map.setZoom(zoom)
@@ -131,6 +133,28 @@ function initMap(connection, settings, drawObject) {
       .delay(250)
       .onValue(() => {
         map.invalidateSize(true)
+      })
+  }
+
+
+  function showTracksOnMapMove () {
+    const paths = ['navigation.speedOverGround', 'environment.depth.belowTransducer']
+    Bacon.fromEvent(map, 'moveend')
+      .map(() => map.getBounds())
+      .skipDuplicates(_.isEqual)
+      .flatMapLatest(bounds => {
+        return trackConnection.queryTracks(bounds, paths)
+      })
+      .onValue(tracks => {
+        const units = Bacon.combineAsArray(
+          paths.map(path => trackConnection.getUnits(path).mapError((err) => "n/a"))
+        )
+        units.onValue(units => {
+          renderTracks(map, tracks, paths, units)
+        })
+        units.onError((err) => {
+          console.log(err)
+        })
       })
   }
 }
@@ -256,6 +280,99 @@ function addCharts(map, providers) {
     }
   })
 }
+
+let trackLayers = []
+const trackColors = [
+  "#4c79a6",
+  "#46a65b",
+  "#a262a6",
+]
+
+function renderTracks (map, featureCollection, paths, units) {
+  trackLayers.forEach(layer => map.removeLayer(layer))
+  trackLayers = featureCollection.features.reduce((acc, feature, i) => {
+    const dayIndex = feature.properties.starttime
+      ? (new Date(feature.properties.starttime).getTime() / 86400000).toFixed()
+      : 0
+    const basicStyle = {
+      color: trackColors[dayIndex % trackColors.length],
+      stroke: 8
+    }
+    const geoJSONLayer = Leaf.geoJSON(feature, { style: basicStyle })
+    geoJSONLayer.on('click', e =>
+      geoJSONLayer.setStyle(_.assign({}, basicStyle, { weight: 6 }))
+    )
+    acc.push(geoJSONLayer)
+
+    featureCollection.properties.dataPaths && featureCollection.properties.dataPaths.forEach((path, i) => {
+      acc.push(toDataLayer(feature, path, units[i], i, featureCollection.properties.dataPaths.length))
+    })
+    return acc
+  }, [])
+  trackLayers.forEach(layer => layer.addTo(map))
+}
+
+
+
+
+function toDataLayer (feature, path, unit, pathIndex, pathsCount) {
+  const valueColor = scaleLinear()
+    .domain([2, 5, 10, 25])
+    .range(['red', 'yellow', 'green', 'blue'])
+  const circleStyles = [
+    {
+      radius: 4,
+      fillOpacity: 1,
+      fillColor: valueColor,
+      color: () => '#000',
+      opacity: 0
+    },
+    {
+      radius: 8,
+      fillOpacity: 0,
+      fillColor: () => '#000',
+      color: valueColor,
+      opacity: 0.6
+    }
+  ]
+
+  const points = []
+
+  const circleStyle =
+    circleStyles[(pathIndex + pathsCount - 1) % circleStyles.length]
+  // [lat, lon, elev, timestamp, ...]
+  const dataIndex = pathIndex + 4
+  feature.geometry.coordinates.forEach(line => {
+    line.forEach(coordinates => {
+      if (coordinates.length >= dataIndex) {
+        const circleMarker = Leaf.circleMarker(
+          Leaf.latLng(coordinates[1], coordinates[0]),
+          {
+            radius: circleStyle.radius,
+            weight: 5,
+            fillOpacity: circleStyle.fillOpacity,
+            fillColor: circleStyle.fillColor(coordinates[dataIndex]),
+            color: circleStyle.color(coordinates[dataIndex]),
+            opacity: circleStyle.opacity
+          }
+        )
+        const displayValue = coordinates[dataIndex] ? coordinates[dataIndex].toFixed(2) : ""
+        circleMarker.bindPopup(
+          `<dl><dt>${path}</dt><dd>${displayValue} ${unit}</dd></dl><i>${new Date(coordinates[3])}</i>`
+        )
+        circleMarker.on('mouseover', e => {
+          circleMarker.openPopup()
+        })
+
+        points.push(circleMarker)
+      }
+    })
+  })
+  return Leaf.layerGroup(points)
+}
+
+
+
 
 function addBasemap(map) {
   map.createPane('basemap')

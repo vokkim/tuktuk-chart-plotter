@@ -139,6 +139,18 @@ Example config:
       "bounds": [19.105224609375, 59.645540251443215, 27.88330078125, 65.84776766596988],
       "center": [24.805, 60.0888]
     }
+  ],
+  "tracks": [
+    {
+      "type": "daily-trackserver",
+      "address": "<url to track server>",
+      "vesselId": "<vessel id on track server>",
+      "username": "basic auth user",
+      "password": "basic auth passwd"
+    },
+    {  // Or for testing purposes
+      "type": "dummy-trackserver"
+    }
   ]
 }
 ```

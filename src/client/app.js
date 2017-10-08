@@ -9,7 +9,8 @@ import Bacon from 'baconjs'
 import _ from 'lodash'
 import {COG, HDG, MAX_ZOOM, MIN_ZOOM, EXTENSION_LINE_OFF, EXTENSION_LINE_2_MIN, EXTENSION_LINE_5_MIN, EXTENSION_LINE_10_MIN} from './enums'
 import Map from './map'
-import Connection from './data-connection'
+import DataConnection from './data-connection'
+import TrackConnection from './track-connection'
 import {toDegrees, toNauticalMiles} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
@@ -18,7 +19,8 @@ numeral.nullFormat('N/A')
 
 const drawObject = Atom({distance: 0, del: false})
 
-const connection = Connection({providers: settings.get().data, settings})
+const dataConnection = DataConnection({providers: settings.get().data, settings})
+const trackConnection = TrackConnection(settings.get().tracks)
 
 fullscreen(settings)
 
@@ -315,12 +317,12 @@ const App = (
   <div>
     <Controls settings={settings}/>
     <Menu settings={settings}/>
-    <Instruments settings={settings} data={connection.selfData}/>
+    <Instruments settings={settings} data={dataConnection.selfData}/>
     {settings.view(L.prop('loadingChartProviders')).skipDuplicates().map(loading => {
       if (loading) {
         return <div className='charts-loading map-wrapper'><h2>Loading ...</h2></div>
       } else {
-        return <Map connection={connection} settings={settings} drawObject={drawObject} />
+        return <Map dataConnection={dataConnection} trackConnection={trackConnection} settings={settings} drawObject={drawObject} />
       }
     })}
   </div>
