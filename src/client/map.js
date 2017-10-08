@@ -136,12 +136,26 @@ function initMap(dataConnection, trackConnection, settings, drawObject) {
       })
   }
 
-  function showTracksOnMapMove() {
+
+  function showTracksOnMapMove () {
+    const paths = ['navigation.speedOverGround', 'environment.depth.belowTransducer']
     Bacon.fromEvent(map, 'moveend')
       .map(() => map.getBounds())
       .skipDuplicates(_.isEqual)
-      .flatMapLatest(trackConnection.queryTracks)
-      .onValue(tracks => renderTracks(map, tracks))
+      .flatMapLatest(bounds => {
+        return trackConnection.queryTracks(bounds, paths)
+      })
+      .onValue(tracks => {
+        const units = Bacon.combineAsArray(
+          paths.map(path => trackConnection.getUnits(path).mapError((err) => "n/a"))
+        )
+        units.onValue(units => {
+          renderTracks(map, tracks, paths, units)
+        })
+        units.onError((err) => {
+          console.log(err)
+        })
+      })
   }
 }
 
@@ -274,7 +288,7 @@ const trackColors = [
   "#a262a6",
 ]
 
-function renderTracks (map, featureCollection) {
+function renderTracks (map, featureCollection, paths, units) {
   trackLayers.forEach(layer => map.removeLayer(layer))
   trackLayers = featureCollection.features.reduce((acc, feature, i) => {
     const dayIndex = feature.properties.starttime
@@ -291,7 +305,7 @@ function renderTracks (map, featureCollection) {
     acc.push(geoJSONLayer)
 
     featureCollection.properties.dataPaths && featureCollection.properties.dataPaths.forEach((path, i) => {
-      acc.push(toDataLayer(feature, path, i, featureCollection.properties.dataPaths.length))
+      acc.push(toDataLayer(feature, path, units[i], i, featureCollection.properties.dataPaths.length))
     })
     return acc
   }, [])
@@ -301,7 +315,7 @@ function renderTracks (map, featureCollection) {
 
 
 
-function toDataLayer (feature, path, pathIndex, pathsCount) {
+function toDataLayer (feature, path, unit, pathIndex, pathsCount) {
   const valueColor = scaleLinear()
     .domain([2, 5, 10, 25])
     .range(['red', 'yellow', 'green', 'blue'])
@@ -342,8 +356,9 @@ function toDataLayer (feature, path, pathIndex, pathsCount) {
             opacity: circleStyle.opacity
           }
         )
+        const displayValue = coordinates[dataIndex] ? coordinates[dataIndex].toFixed(2) : ""
         circleMarker.bindPopup(
-          `${path} ${coordinates[dataIndex]} \n${new Date(coordinates[3])}`
+          `<dl><dt>${path}</dt><dd>${displayValue} ${unit}</dd></dl><i>${new Date(coordinates[3])}</i>`
         )
         circleMarker.on('mouseover', e => {
           circleMarker.openPopup()
