@@ -56,10 +56,10 @@
     "react-drag-sortable": "1.0.4",
     "request": "2.81.0",
     "screenfull": "3.2.2",
-    "signalk-client": "github:signalk/signalk-js-client",
     "store": "2.0.12",
     "watch-run": "1.2.5",
     "webpack": "3.0.0",
-    "whatwg-fetch": "2.0.3"
+    "whatwg-fetch": "2.0.3",
+    "@signalk/client": "0.1.1"
   }
 }

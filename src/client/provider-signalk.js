@@ -2,7 +2,7 @@ import * as L from 'partial.lenses'
 import Bacon from 'baconjs'
 import _ from 'lodash'
 import api from './api'
-import SignalK from 'signalk-client'
+import SignalK from '@signalk/client'
 
 function connect({address, settings}) {
   const rawStream = new Bacon.Bus()
