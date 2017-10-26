@@ -1,5 +1,3 @@
-import numeral from 'numeral'
-import Bacon from 'baconjs'
 import _ from 'lodash'
 import {toDegrees, toKnots} from './utils'
 

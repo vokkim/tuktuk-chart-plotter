@@ -1,4 +1,3 @@
-import * as L from 'partial.lenses'
 import Bacon from 'baconjs'
 import _ from 'lodash'
 import api from './api'
@@ -83,7 +82,7 @@ function connect({address, settings}) {
   }
 }
 
-function parseAISData({selfId, connection, address, rawStream, settings}) {
+function parseAISData({selfId, address, rawStream, settings}) {
   const aisEnabled = settings.map(s => _.get(s, 'ais.enabled', false)).skipDuplicates()
   //TODO: Subscribe / unsubscribe for AIS vessels
   const aisStream = rawStream

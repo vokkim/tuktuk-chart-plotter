@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "lint": "eslint --ext=js src/",
-    "bundle": "npm run bundle:css && npm run bundle:js",
+    "bundle": "npm run lint && npm run bundle:css && npm run bundle:js",
     "bundle:js": "rm ./public/bundle.js || true && ./node_modules/.bin/webpack --hide-modules --bail -p --config=webpack.bundle.js",
     "bundle:css": "rm ./public/bundle.css || true && ./node_modules/.bin/lessc src/styles/app.less > .bundle.css && node_modules/postcss-cli/bin/postcss --use autoprefixer --replace .bundle.css && mv .bundle.css public/bundle.css",
     "watch:js": "./node_modules/.bin/webpack --hide-modules --watch --config=webpack.bundle.js",

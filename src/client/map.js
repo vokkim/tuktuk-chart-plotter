@@ -6,10 +6,11 @@ import _ from 'lodash'
 import numeral from 'numeral'
 import * as Leaf from 'leaflet'
 import {computeDestinationPoint} from 'geolib'
+// eslint-disable-next-line no-unused-vars
 import LeafletRotatedMarker from 'leaflet-rotatedmarker'
 import api from './api'
 import {toDegrees, toKnots} from './utils'
-import {COG, HDG, MAX_ZOOM, MIN_ZOOM, KNOTS_TO_MS, EXTENSION_LINE_OFF, EXTENSION_LINE_2_MIN, EXTENSION_LINE_5_MIN, EXTENSION_LINE_10_MIN} from './enums'
+import {COG, MAX_ZOOM, MIN_ZOOM, EXTENSION_LINE_OFF} from './enums'
 
 class Map extends React.Component {
   componentDidMount() {
@@ -220,7 +221,6 @@ function handleDrawPath({map, settings, drawObject}) {
       } else {
         return 0
       }
-      return
     }, 0)
     drawObject.view(L.prop('distance')).set(distance)
   }

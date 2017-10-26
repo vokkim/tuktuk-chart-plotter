@@ -1,8 +1,7 @@
 import Bacon from 'baconjs'
-import _ from 'lodash'
 import {toRadians} from './utils'
 
-function connect({settings}) {
+function connect() {
   const rawStream = new Bacon.Bus()
 
   if (!navigator.geolocation || !navigator.geolocation.watchPosition) {
@@ -38,7 +37,7 @@ function connect({settings}) {
     maximumAge: 5000
   }
 
-  const watchID = navigator.geolocation.watchPosition(success, error, options)
+  navigator.geolocation.watchPosition(success, error, options)
 
   return {
     selfData: rawStream,

@@ -10,7 +10,7 @@ import _ from 'lodash'
 import {COG, HDG, MAX_ZOOM, MIN_ZOOM, EXTENSION_LINE_OFF, EXTENSION_LINE_2_MIN, EXTENSION_LINE_5_MIN, EXTENSION_LINE_10_MIN} from './enums'
 import Map from './map'
 import Connection from './data-connection'
-import {toDegrees, toNauticalMiles} from './utils'
+import {toNauticalMiles} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 import {settings, clearSettingsFromLocalStorage} from './settings'
@@ -230,7 +230,6 @@ class InstrumentSettings extends React.Component {
   render() {
     const {_internalSort} = this
     const {instrumentSettings} = this.props
-    const allConfigs = _.keys(InstrumentConfig)
     const instruments = instrumentSettings.map(instruments => {
       const sortOrder = _internalSort.get()
       return _.map(sortOrder, key => {
@@ -262,6 +261,7 @@ class InstrumentSettings extends React.Component {
     return (
       <div className='instrument-settings'>
         {instruments.map(list =>
+          // eslint-disable-next-line react/jsx-key
           <DragSortableList items={list} onSort={onSort} type='vertical'/>
         )}
       </div>
