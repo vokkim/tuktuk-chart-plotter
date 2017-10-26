@@ -1,5 +1,5 @@
 node_modules/
-public/bundle.js.map
+public/bundle*
 .bundle.css
 npm-debug.*
 client-config.json
