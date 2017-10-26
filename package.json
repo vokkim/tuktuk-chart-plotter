@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "lint": "eslint --ext=js src/",
     "bundle": "npm run bundle:css && npm run bundle:js",
     "bundle:js": "rm ./public/bundle.js || true && ./node_modules/.bin/webpack --hide-modules --bail -p --config=webpack.bundle.js",
     "bundle:css": "rm ./public/bundle.css || true && ./node_modules/.bin/lessc src/styles/app.less > .bundle.css && node_modules/postcss-cli/bin/postcss --use autoprefixer --replace .bundle.css && mv .bundle.css public/bundle.css",
@@ -29,6 +30,7 @@
   "dependencies": {},
   "devDependencies": {
     "@mapbox/mbtiles": "0.9.0",
+    "@signalk/client": "0.1.1",
     "autoprefixer": "7.1.6",
     "babel-cli": "6.26.0",
     "babel-core": "6.26.0",
@@ -41,6 +43,9 @@
     "baret": "1.0.4",
     "classnames": "2.2.5",
     "compression": "1.7.1",
+    "eslint": "^4.9.0",
+    "eslint-plugin-es5": "^1.1.0",
+    "eslint-plugin-react": "^7.4.0",
     "express": "4.16.2",
     "geolib": "2.0.23",
     "leaflet": "1.2.0",
@@ -59,7 +64,31 @@
     "store": "2.0.12",
     "watch-run": "1.2.5",
     "webpack": "3.8.1",
-    "whatwg-fetch": "2.0.3",
-    "@signalk/client": "0.1.1"
+    "whatwg-fetch": "2.0.3"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:react/recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 6,
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "jsx": true
+      }
+    },
+    "env": {
+      "node": true,
+      "browser": true
+    },
+    "rules": {
+      "no-console": "off",
+      "linebreak-style": [
+        "error",
+        "unix"
+      ],
+      "react/prop-types": "off"
+    }
   }
 }
