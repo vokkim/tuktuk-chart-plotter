@@ -25,11 +25,47 @@ running and maybe some [charts](https://github.com/vokkim/tuktuk-chart-plotter#c
 - `CHARTS_PATH` = location for chart files (`.mbtiles`), default `charts/`
 - `CLIENT_CONFIG_FILE` = client config file, default `client-config.json`
 
+# Client config
+
+- When the plotter is ran with a local server using `npm run start` or `npm run watch`, the browser will receive a configuration file defined by the `CLIENT_CONFIG_FILE` environment variable.
+
+- When the plotter is accessed through Signal K server plugin, the browser will use default Signal K configration defined in `public/index.html`
+
+Example config:
+``` javascript
+{
+  "data": [
+    {
+      "type": "signalk",
+      "address": "localhost:3000"
+    }
+  ],
+  "course": "COG",
+  "follow": true,
+  "showInstruments": true,
+  "zoom": 13,
+  "charts": [
+    {
+      "index": 0,
+      "type": "tilelayer",
+      "maxzoom": 15,
+      "minzoom": 4,
+      "name": "liikennevirasto_rannikkokartat_public_15_4",
+      "description": "Lähde: Liikennevirasto. Ei navigointikäyttöön. Ei täytä virallisen merikartan vaatimuksia.",
+      "tilemapUrl": "/charts/liikennevirasto_rannikkokartat_public_15_4/{z}/{x}/{y}",
+      "bounds": [19.105224609375, 59.645540251443215, 27.88330078125, 65.84776766596988],
+      "center": [24.805, 60.0888]
+    }
+  ]
+}
+```
+
+
 # Data providers
 
-## SignalK
+## Signal K
 
-Chart plotter is designed to work with [SignalK](http://signalk.org/):
+Chart plotter is designed to work with [Signal K](http://signalk.org/):
 
 - Install and run [signalk-server-node](https://github.com/SignalK/signalk-server-node)
 - Add `signalk` data provider to `client-config.json`:
@@ -80,9 +116,9 @@ Some example MBTiles charts:
 - Finnish nautical charts: https://github.com/vokkim/rannikkokartat-mbtiles
 - NOAA charts are also provided in MBTiles format: http://tileservice.charts.noaa.gov/
 
-## SignalK charts
+## Signal K charts
 
-Map tiles hosted by SignalK server are configured in `client-config.json` by adding `signalk` chart provider:
+Map tiles hosted by Signal K server are configured in `client-config.json` by adding `signalk` chart provider:
 ``` javascript
 ...
 "charts": [
@@ -110,35 +146,4 @@ Other charts in `client-config.json` are of type `tilelayer`:
     "tilemapUrl": "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
   }
 ]
-```
-
-# Client config
-
-Example config:
-``` javascript
-{
-  "data": [
-    {
-      "type": "signalk",
-      "address": "localhost:3000"
-    }
-  ],
-  "course": "COG",
-  "follow": true,
-  "showInstruments": true,
-  "zoom": 13,
-  "charts": [
-    {
-      "index": 0,
-      "type": "tilelayer",
-      "maxzoom": 15,
-      "minzoom": 4,
-      "name": "liikennevirasto_rannikkokartat_public_15_4",
-      "description": "Lähde: Liikennevirasto. Ei navigointikäyttöön. Ei täytä virallisen merikartan vaatimuksia.",
-      "tilemapUrl": "/charts/liikennevirasto_rannikkokartat_public_15_4/{z}/{x}/{y}",
-      "bounds": [19.105224609375, 59.645540251443215, 27.88330078125, 65.84776766596988],
-      "center": [24.805, 60.0888]
-    }
-  ]
-}
 ```
