@@ -13,7 +13,7 @@
     "watch:css": "npm run bundle:css && watch-run -p 'src/styles/*.less' 'npm run bundle:css'",
     "watch:server": "nodemon --ext js,css,json --watch src index.js",
     "watch": "npm run watch:js & npm run watch:css & npm run watch:server & wait",
-    "prepublish": "NODE_ENV=production npm run bundle"
+    "prepare": "NODE_ENV=production npm run bundle"
   },
   "repository": {
     "type": "git",
