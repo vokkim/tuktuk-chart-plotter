@@ -5,7 +5,7 @@ import SignalK from '@signalk/client'
 
 function connect({address, settings}) {
   const rawStream = new Bacon.Bus()
-  let selfId
+  let selfId // TODO: Nasty, get rid of this mutate
 
   const onMessage = (msg) => {
     if (!selfId && msg && msg.self && _.isString(msg.self)) {
@@ -32,20 +32,19 @@ function connect({address, settings}) {
         {path: '*', period: 10000}
       ]
     })
-    console.log('CONNECTED')
+    console.log(`SignalK connected to ${parseAddress(address)}`)
   }
   const onDisconnect = (c) => {
     c && c.close && c.close()
     rawStream.end()
-    console.log('DISCONNECTED')
+    console.log('SignalK disconnected')
   }
   const onError = (e) => {
     rawStream.push(new Bacon.Error(e))
   }
   const signalk = new SignalK.Client()
   const connection = signalk.connectDelta(parseAddress(address), onMessage, onConnect, onDisconnect, onError, onDisconnect, 'none')
-
-  const selfStream = rawStream.filter(msg => msg.context === 'vessels.'+selfId)
+  const selfStream = rawStream.filter(msg => msg.context === selfId)
 
   const updates = selfStream.map(msg => {
     return _(msg.updates)
@@ -86,7 +85,7 @@ function parseAISData({selfId, address, rawStream, settings}) {
   const aisEnabled = settings.map(s => _.get(s, 'ais.enabled', false)).skipDuplicates()
   //TODO: Subscribe / unsubscribe for AIS vessels
   const aisStream = rawStream
-    .filter(msg => msg.context !== 'vessels.'+selfId)
+    .filter(msg => msg.context !== selfId)
     .map(singleDeltaMessageToAisData)
 
   const fullAisData = aisEnabled
