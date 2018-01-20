@@ -187,7 +187,7 @@ const Menu = ({settings}) => {
             <InstrumentSettings instrumentSettings={settings.view(L.prop('instruments'))} />
           </Accordion>
           <Accordion header='Charts'>
-            <div>{settings.map('.chartProviders').map(renderChartAttributions)}</div>
+            <ChartSettings chartProviders={settings.view(L.prop('chartProviders'))}/>
           </Accordion>
           <button
             className='button reset-settings'
@@ -205,6 +205,44 @@ const Menu = ({settings}) => {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+const ChartRow = ({provider, onClick}) => {
+  const {id, name, enabled, description, minzoom, maxzoom} = provider
+  return (
+    <div
+      className={classNames('charts-provider', {enabled: enabled, disabled: !enabled})}
+      key={id || name}
+      onClick={onClick}>
+      <div>
+        <p className='name'>{name}</p>
+        {description && <p className='description'>{description}</p>}
+        {minzoom && maxzoom && <p className='levels'>Levels: {minzoom} - {maxzoom}</p>}
+      </div>
+      <div>
+        <i className={enabled ? 'icon-checkbox-checked' : 'icon-checkbox-unchecked'} />
+      </div>
+    </div>
+  )
+}
+
+const ChartSettings = ({chartProviders}) => {
+  const renderProviderRow = provider => {
+    const onClick = () => chartProviders.view(L.compose(L.find(p => p.id === provider.id), L.prop('enabled'))).modify(v => !v)
+    return <ChartRow provider={provider} onClick={onClick} />
+  }
+
+  return (
+    <div className='charts'>
+      {chartProviders.map(providers => {
+        if (_.isEmpty(providers)) {
+          return <li>No charts</li>
+        }
+        return _.map(_.sortBy(providers, 'index'), renderProviderRow)
+      })
+      }
     </div>
   )
 }
@@ -267,25 +305,6 @@ class InstrumentSettings extends React.Component {
       </div>
     )
   }
-}
-
-function renderChartAttributions(charts) {
-  if (_.isEmpty(charts)) {
-    return <div>No charts</div>
-  }
-  return (
-    <ul className='charts'>
-      {_.map(_.sortBy(charts, 'index'), provider => {
-        return (
-          <li className='charts-provider' key={provider.id || provider.name}>
-            <p className='name'>{provider.name}</p>
-            {provider.description && <p className='description'>{provider.description}</p>}
-            {provider.minzoom && provider.maxzoom && <p className='levels'>Levels: {provider.minzoom} - {provider.maxzoom}</p>}
-          </li>
-        )
-      })}
-    </ul>
-  )
 }
 
 class Accordion extends React.Component {

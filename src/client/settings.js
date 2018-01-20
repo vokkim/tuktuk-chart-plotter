@@ -64,7 +64,7 @@ function fetchLocalCharts(provider) {
   return api.get({url}).flatMap(charts => {
     return Bacon.fromArray(_.map(_.values(charts), chart => {
       const from = _.pick(chart, ['tilemapUrl', 'index', 'type', 'name', 'minzoom', 'maxzoom', 'center', 'description', 'format', 'bounds'])
-      return _.merge({id: chart.name, index: provider.index || 0}, from)
+      return _.merge({id: chart.name, index: provider.index || 0, enabled: true}, from)
     }))
   })
 }
@@ -76,7 +76,7 @@ function fetchSignalKCharts(provider) {
     return Bacon.fromArray(_.map(_.values(charts), chart => {
       const tilemapUrl = address + chart.tilemapUrl
       const from = _.pick(chart, ['type', 'name', 'minzoom', 'maxzoom', 'center', 'description', 'format', 'bounds'])
-      return _.merge({id: chart.name, tilemapUrl, minzoom: MIN_ZOOM, maxzoom: MAX_ZOOM, index: provider.index || 0}, from)
+      return _.merge({id: chart.name, tilemapUrl, minzoom: MIN_ZOOM, maxzoom: MAX_ZOOM, index: provider.index || 0 , enabled: true}, from)
     }))
   })
 }

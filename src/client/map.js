@@ -42,7 +42,7 @@ function initMap(connection, settings, drawObject) {
   window.map = map
   initialSettings.worldBaseChart && addBasemap(map)
 
-  addCharts(map, initialSettings.chartProviders)
+  addCharts(map, initialSettings.chartProviders, settings.map('.chartProviders'))
   const vesselIcons = createVesselIcons(_.get(initialSettings.data, ['0', 'type']) === 'geolocation')
 
   const myVessel = Leaf.marker([0, 0], {icon: resolveIcon(vesselIcons, initialSettings.zoom), draggable: false, zIndexOffset: 990, rotationOrigin: 'center center', rotationAngle: 0})
@@ -235,8 +235,9 @@ function handleDrawPath({map, settings, drawObject}) {
     })
 }
 
-function addCharts(map, providers) {
-  _.each(providers, provider => {
+function addCharts(map, providers, providersP) {
+
+  const mapLayers = _.map(providers, provider => {
     if (!_.includes(['tilelayer'], provider.type)) {
       console.error(`Unsupported chart type ${provider.type} for chart ${provider.name}`)
       return
@@ -248,12 +249,28 @@ function addCharts(map, providers) {
     const pane = `chart-${provider.index}`
     map.createPane(pane)
     const bounds = parseChartBounds(provider)
-    Leaf.tileLayer(provider.tilemapUrl, {detectRetina: true, bounds, maxNativeZoom: provider.maxzoom, minNativeZoom: provider.minzoom, pane}).addTo(map)
-    if (_.isArray(provider.center) && provider.center.length == 2) {
-      map.panTo([provider.center[1], provider.center[0]])
-    } else if (bounds) {
-      map.fitBounds(bounds)
+    const layer = Leaf.tileLayer(provider.tilemapUrl, {detectRetina: true, bounds, maxNativeZoom: provider.maxzoom, minNativeZoom: provider.minzoom, pane})
+
+    if (provider.enabled) {
+      layer.addTo(map)
+      if (_.isArray(provider.center) && provider.center.length == 2) {
+        map.panTo([provider.center[1], provider.center[0]])
+      } else if (bounds) {
+        map.fitBounds(bounds)
+      }
     }
+    return {provider, layer}
+  })
+
+  providersP.skipDuplicates().skip(1).onValue(providers => {
+    _.each(providers, ({enabled, id}) => {
+      const mapLayer = _.find(mapLayers, ({provider}) => provider.id === id)
+      if (enabled) {
+        mapLayer.layer.addTo(map)
+      } else {
+        mapLayer.layer.removeFrom(map)
+      }
+    })
   })
 }
 
