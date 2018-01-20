@@ -173,7 +173,7 @@ function handleAisTargets({map, aisData, settings}) {
         aisMarkers[k] = vesselMarker
       }
       if (aisMarkers[k]) {
-        const name = _.get(v, 'name.value', 'Unknown')
+        const name = _.get(v, 'name.value') || v.name || 'Unknown'
         const formattedSog = numeral(sog).format('0.0')
         const formattedCog = numeral(course).format('0')
         const tooltip = `<div class='name'>${name}</div><div>SOG: ${formattedSog} kn</div><div>COG: ${formattedCog}</div>`

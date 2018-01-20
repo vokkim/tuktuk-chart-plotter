@@ -113,12 +113,14 @@ function parseAISData({selfId, address, rawStream, settings}) {
 function singleDeltaMessageToAisData(msg) {
   return _(msg.updates)
     .map(u => _.map(u.values, v => {
-      const isName = v.value && v.value.name
-      const path = isName ? 'name' : v.path
+      const isName = v.value && v.value.name && _.isEmpty(v.path)
+      const isMmsi = v.value && v.value.mmsi && _.isEmpty(v.path)
+      const path = isName && 'name' || isMmsi && 'mmsi' || v.path
+      const value = isName && v.value.name || isMmsi && v.value.mmsi || v.value
       const data = {
         timestamp: u.timestamp,
         path,
-        value: isName ? v.value.name : v.value
+        value
       }
       return {vessel: msg.context.substring(8), data: {[path]: data}}
     }))
