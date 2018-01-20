@@ -1,4 +1,12 @@
-# WIP
+
+# Tuktuk Chart plotter
+
+Chart plotter for [Signal K](https://github.com/SignalK/signalk-server-node) with the support for raster chart providers.
+
+Very much _WIP_.
+
+
+<img src="https://github.com/vokkim/tuktuk-chart-plotter/raw/master/preview-1.jpg" alt="Tuktuk plotter with Finnish charts" width="300" />|<img src="https://github.com/vokkim/tuktuk-chart-plotter/raw/master/preview-2.jpg" alt="Tuktuk plotter with NOAA charts" width="300" />
 
 # Install
 
@@ -94,6 +102,10 @@ To use the [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Ge
 
 # Charts
 
+Some example MBTiles charts can be found from:
+- Finnish nautical charts: https://github.com/vokkim/rannikkokartat-mbtiles
+- NOAA charts: https://github.com/vokkim/noaa-nautical-charts
+
 ## Local charts
 
 Put charts in [MBTiles](https://github.com/mapbox/mbtiles-spec) format to your `CHARTS_PATH`.
@@ -110,11 +122,6 @@ Local charts are configured in `client-config.json` by adding `local` chart prov
 ]
 ...
 ```
-
-Some example MBTiles charts:
-
-- Finnish nautical charts: https://github.com/vokkim/rannikkokartat-mbtiles
-- NOAA charts are also provided in MBTiles format: http://tileservice.charts.noaa.gov/
 
 ## Signal K charts
 
@@ -147,3 +154,7 @@ Other charts in `client-config.json` are of type `tilelayer`:
   }
 ]
 ```
+
+## License
+
+MIT
