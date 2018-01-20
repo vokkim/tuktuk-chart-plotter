@@ -237,6 +237,7 @@ function handleDrawPath({map, settings, drawObject}) {
 
 function addCharts(map, providers, providersP) {
 
+  // Initialize charts based on initial providers
   const mapLayers = _.map(providers, provider => {
     if (!_.includes(['tilelayer'], provider.type)) {
       console.error(`Unsupported chart type ${provider.type} for chart ${provider.name}`)
@@ -249,7 +250,10 @@ function addCharts(map, providers, providersP) {
     const pane = `chart-${provider.index}`
     map.createPane(pane)
     const bounds = parseChartBounds(provider)
-    const layer = Leaf.tileLayer(provider.tilemapUrl, {detectRetina: true, bounds, maxNativeZoom: provider.maxzoom, minNativeZoom: provider.minzoom, pane})
+    // 'detectRetina' messes up Leaflet maxNativeZoom, fix with a hack:
+    const maxNativeZoom = provider.maxzoom - (Leaf.Browser.retina ? 1 : 0)
+    const minNativeZoom = provider.minzoom + (Leaf.Browser.retina ? 1 : 0)
+    const layer = Leaf.tileLayer(provider.tilemapUrl, {detectRetina: true, bounds, maxNativeZoom, minNativeZoom, pane})
 
     if (provider.enabled) {
       layer.addTo(map)
@@ -262,6 +266,7 @@ function addCharts(map, providers, providersP) {
     return {provider, layer}
   })
 
+  // Toggle chart layers on/off based on enabled providers
   providersP.skipDuplicates().skip(1).onValue(providers => {
     _.each(providers, ({enabled, id}) => {
       const mapLayer = _.find(mapLayers, ({provider}) => provider.id === id)
