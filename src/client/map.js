@@ -239,26 +239,28 @@ function addCharts(map, providers, providersP) {
 
   // Initialize charts based on initial providers
   const mapLayers = _.map(providers, provider => {
-    if (!_.includes(['tilelayer'], provider.type)) {
-      console.error(`Unsupported chart type ${provider.type} for chart ${provider.name}`)
+    const {index, name, maxzoom, minzoom, tilemapUrl, enabled, type, center} = provider
+
+    if (!_.includes(['tilelayer'], type)) {
+      console.error(`Unsupported chart type ${type} for chart ${name}`)
       return
     }
-    if (!provider.tilemapUrl) {
-      console.error(`Missing tilemapUrl for chart ${provider.name}`)
+    if (!tilemapUrl) {
+      console.error(`Missing tilemapUrl for chart ${name}`)
       return
     }
-    const pane = `chart-${provider.index}`
+    const pane = `chart-${index}`
     map.createPane(pane)
     const bounds = parseChartBounds(provider)
     // 'detectRetina' messes up Leaflet maxNativeZoom, fix with a hack:
-    const maxNativeZoom = provider.maxzoom - (Leaf.Browser.retina ? 1 : 0)
-    const minNativeZoom = provider.minzoom + (Leaf.Browser.retina ? 1 : 0)
-    const layer = Leaf.tileLayer(provider.tilemapUrl, {detectRetina: true, bounds, maxNativeZoom, minNativeZoom, pane})
+    const maxNativeZoom = maxzoom ? (maxzoom - (Leaf.Browser.retina ? 1 : 0)) : undefined
+    const minNativeZoom = minzoom ? (minzoom + (Leaf.Browser.retina ? 1 : 0)) : undefined
+    const layer = Leaf.tileLayer(tilemapUrl, {detectRetina: true, bounds, maxNativeZoom, minNativeZoom, pane})
 
-    if (provider.enabled) {
+    if (enabled) {
       layer.addTo(map)
-      if (_.isArray(provider.center) && provider.center.length == 2) {
-        map.panTo([provider.center[1], provider.center[0]])
+      if (_.isArray(center) && center.length == 2) {
+        map.panTo([center[1], center[0]])
       } else if (bounds) {
         map.fitBounds(bounds)
       }
