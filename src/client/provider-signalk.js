@@ -87,11 +87,11 @@ function parseAISData({selfId, address, rawStream, settings}) {
   const aisStream = rawStream
     .filter(msg => msg.context !== selfId)
     .map(singleDeltaMessageToAisData)
-
   const fullAisData = aisEnabled
     .flatMapLatest(enabled => {
       return enabled ? getInitialAISData(address) : Bacon.once()
     })
+    .changes()
     .merge(aisStream)
     .scan({delta: [], full: {}}, (previous, vesselData) => {
       const delta = _.reduce(vesselData, (sum, row) => {
