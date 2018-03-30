@@ -40,6 +40,7 @@ function connect() {
   navigator.geolocation.watchPosition(success, error, options)
 
   return {
+    connectionState: Bacon.constant('connected'),
     selfData: rawStream,
     aisData: Bacon.constant({})
   }

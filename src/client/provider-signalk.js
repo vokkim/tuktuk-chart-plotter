@@ -11,6 +11,8 @@ const isSelf = (id) => {
 
 function connect({address, settings}) {
   const rawStream = new Bacon.Bus()
+  const connectionStateBus = new Bacon.Bus()
+  const connectionState = connectionStateBus.toProperty('connecting')
 
   const onMessage = (msg) => {
     if (!selfId && msg && msg.self && _.isString(msg.self)) {
@@ -19,6 +21,7 @@ function connect({address, settings}) {
     rawStream.push(msg)
   }
   const onConnect = (c) => {
+    connectionStateBus.push('connected')
     c.send({
       context: 'vessels.self',
       subscribe: [
@@ -42,11 +45,14 @@ function connect({address, settings}) {
   const onDisconnect = (c) => {
     c && c.close && c.close()
     rawStream.end()
+    connectionStateBus.push('disconnected')
     console.log('SignalK disconnected')
   }
   const onError = (e) => {
     rawStream.push(new Bacon.Error(e))
+    onDisconnect()
   }
+
   const signalk = new SignalK.Client()
   const connection = signalk.connectDelta(parseAddress(address), onMessage, onConnect, onDisconnect, onError, onDisconnect, 'none')
   const selfStream = rawStream.filter(msg => isSelf(msg.context))
@@ -80,6 +86,7 @@ function connect({address, settings}) {
     })
 
   return {
+    connectionState: connectionState,
     rawStream,
     selfData,
     aisData

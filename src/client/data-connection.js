@@ -8,6 +8,7 @@ function connect({providers, settings}) {
   }
   if (providers.length === 0) {
     return {
+      connectionState: Bacon.constant('disconnected'),
       selfData: Bacon.constant({}),
       aisData: Bacon.constant({})
     }

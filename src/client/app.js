@@ -22,7 +22,7 @@ const connection = Connection({providers: settings.get().data, settings})
 
 fullscreen(settings)
 
-const Controls = ({settings}) => {
+const Controls = ({settings, connectionState}) => {
   return (
     <div className='top-bar-controls'>
       <div className='top-bar-controls-left'>
@@ -32,7 +32,13 @@ const Controls = ({settings}) => {
           iconClass='icon-menu'
           onClick={() => settings.view(L.prop('showMenu')).modify(v => !v)} />
       </div>
-      <div className='top-bar-controls-center'></div>
+      <div className='top-bar-controls-center'>
+        {connectionState.map(state => {
+          if (state === 'disconnected') {
+            return <div className='connection-state disconnected'>Signal K disconnected</div>
+          }
+        })}
+      </div>
       <div className='top-bar-controls-right'>
         {<PathDrawControls settings={settings} />}
         <TopBarButton
@@ -332,7 +338,7 @@ class Accordion extends React.Component {
 
 const App = (
   <div>
-    <Controls settings={settings}/>
+    <Controls settings={settings} connectionState={connection.connectionState}/>
     <Menu settings={settings}/>
     <Instruments settings={settings} data={connection.selfData}/>
     {settings.view(L.prop('loadingChartProviders')).skipDuplicates().map(loading => {
