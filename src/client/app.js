@@ -52,7 +52,12 @@ const Controls = ({settings, connectionState}) => {
       <div className="top-bar-controls-right">
         {<PathDrawControls settings={settings} />}
         <TopBarButton
-          className="instruments"
+            className='waypoint'
+            enabled={settings.view(L.prop('waypoint'))}
+            iconClass='icon-flag'
+            onClick={() => settings.view(L.prop('waypoint')).modify(v => !v)} />
+        <TopBarButton
+          className='instruments'
           enabled={settings.view(L.prop('showInstruments'))}
           iconClass="icon-meter"
           onClick={() => settings.view(L.prop('showInstruments')).modify(v => !v)}
