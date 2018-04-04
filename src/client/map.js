@@ -101,6 +101,28 @@ function initMap(connection, settings, drawObject) {
   handleMapZoom()
   handleDragAndFollow()
   handleInstrumentsToggle()
+  handleDrawWaypoint({map, settings})
+
+  function handleDrawWaypoint({map, settings}) {
+    const waypointMarker = Leaf.icon({
+      iconUrl: 'path-marker.png',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    })
+
+    Bacon.fromEvent(map, 'click')
+        .filter(settings.view(L.prop('waypoint')))
+        .map(e => {
+          const {latlng} = e
+          return Leaf.marker(latlng, {icon: waypointMarker})
+        })
+        .onValue(marker => {
+          marker.addTo(map)
+          settings.view(L.prop('waypoint')).set(false)
+        })
+
+  }
+
   function handleMapZoom() {
     settings
       .map('.zoom')
