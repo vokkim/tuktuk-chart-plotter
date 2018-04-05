@@ -55,7 +55,7 @@ const Controls = ({settings, connectionState}) => {
             className='waypoint'
             enabled={settings.view(L.prop('waypoint'))}
             iconClass='icon-flag'
-            onClick={() => settings.view(L.prop('waypoint')).modify(v => !v)} />
+            onClick={onClickWaypoint} />
         <TopBarButton
           className='instruments'
           enabled={settings.view(L.prop('showInstruments'))}
@@ -144,11 +144,20 @@ const PathDrawControls = ({settings}) => {
       <TopBarButton
         className="drawMode"
         enabled={settings.view(L.prop('drawMode'))}
-        iconClass="icon-pencil2"
-        onClick={() => settings.view(L.prop('drawMode')).modify(v => !v)}
-      />
+        iconClass='icon-pencil2'
+        onClick={onClickDraw}/>
     </div>
   )
+}
+
+const onClickDraw = function(){
+  settings.view(L.prop('drawMode')).modify(v => !v)
+  settings.view(L.prop('waypoint')).set(false)
+}
+
+const onClickWaypoint = function(){
+  settings.view(L.prop('waypoint')).modify(v => !v)
+  settings.view(L.prop('drawMode')).set(false)
 }
 
 const Instrument = ({value, format = '0.00', className, title, unit}) => {

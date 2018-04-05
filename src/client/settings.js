@@ -23,8 +23,7 @@ const defaultSettings = {
   chartProviders: [],
   loadingChartProviders: true,
   data: [],
-  instruments: _.keys(InstrumentConfig),
-  waypoint: false
+  instruments: _.keys(InstrumentConfig)
 }
 
 const fromLocalStorage = Store.get(LOCAL_STORAGE_KEY) || {}

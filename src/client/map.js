@@ -95,7 +95,8 @@ function initMap(connection, settings, drawObject) {
       }
     }
   })
-
+  
+  settings.view(L.prop('waypoint')).set(false)
   handleAisTargets({map, aisData: connection.aisData, settings})
   handleDrawPath({map, settings, drawObject})
   handleMapZoom()
@@ -114,11 +115,16 @@ function initMap(connection, settings, drawObject) {
         .filter(settings.view(L.prop('waypoint')))
         .map(e => {
           const {latlng} = e
-          return Leaf.marker(latlng, {icon: waypointMarker})
+          if(global.waypointObj == Object(global.waypointObj) ){
+            map.removeLayer(global.waypointObj)
+          }
+          const marker = Leaf.marker(latlng, {icon: waypointMarker})
+          global.waypointObj = marker;
+          settings.view(L.prop('waypoint')).set(false)
+          return marker
         })
         .onValue(marker => {
           marker.addTo(map)
-          settings.view(L.prop('waypoint')).set(false)
         })
 
   }
