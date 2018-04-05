@@ -71,6 +71,38 @@ const InstrumentConfigs = {
     title: 'AWA (STW)',
     format: '0',
     unit: '°'
+  },
+  vmg: {
+    dataKey: 'performance.vmg',
+    transformFn: toDegrees,
+    className: 'vmg',
+    title: 'VMG',
+    format: '0',
+    unit: 'kn'
+  },
+  eta: {
+    dataKey: 'performance.eta',
+    transformFn: toDegrees,
+    className: 'eta',
+    title: 'ETA',
+    format: '0',
+    unit: 'h'
+  },
+  dtw:{
+    dataKey: 'performance.dtw',
+    transformFn: toDegrees,
+    className: 'dtw',
+    title: 'DTW',
+    format: '0',
+    unit: 'kn'
+  },
+  btw:{
+    dataKey: 'performance.btw',
+    transformFn: toDegrees,
+    className: 'btw',
+    title: 'BTW',
+    format: '0',
+    unit: '°'
   }
 }
 
