@@ -19,7 +19,7 @@ import {
 } from './enums'
 import Map from './map'
 import Connection from './data-connection'
-import {toNauticalMiles} from './utils'
+import {toNauticalMiles, distanceBetweenCoordinates,beringBetweenCoordinates,toDegrees} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 import {settings, clearSettingsFromLocalStorage} from './settings'
@@ -391,6 +391,43 @@ class Accordion extends React.Component {
     this.setState({open: !this.state.open})
   }
 }
+
+// listen for new data form the connection even if we are not exactly using them.
+const waypointInstrument = Bacon.combineTemplate({
+  waypointInstrument : connection.selfData,
+})
+
+waypointInstrument.onValue(({waypointInstrument , /*settings*/}) => {
+  if( typeof waypointInstrument['navigation.position'] == 'object'
+    && typeof global.waypointObj == 'object' ) {
+    var wpPos = global.waypointObj._latlng
+    var vesselPos = waypointInstrument['navigation.position']
+
+    //dtw 
+    var dtw = distanceBetweenCoordinates(vesselPos.latitude, vesselPos.longitude, wpPos.lat, wpPos.lng)
+    document.getElementsByClassName("dtw")[0].getElementsByClassName("value")[0].innerHTML = String(dtw).slice(0, 4);
+
+    // vmg
+    var boatDegrees = toDegrees(waypointInstrument['navigation.courseOverGroundTrue'])
+    var wpDegrees = beringBetweenCoordinates(vesselPos.latitude, vesselPos.longitude, wpPos.lat, wpPos.lng)
+    var DegreesOffcourse = Math.abs(wpDegrees-boatDegrees)
+    var vmgPourcentage = 100-((DegreesOffcourse)/90*100)
+    var vmg = waypointInstrument['navigation.speedOverGround']*(vmgPourcentage/100)
+    document.getElementsByClassName("vmg")[0].getElementsByClassName("value")[0].innerHTML = String(vmg).slice(0, 4);
+
+    // eta
+    var eta = dtw/vmg
+    document.getElementsByClassName("eta")[0].getElementsByClassName("value")[0].innerHTML = String(eta).slice(0, 4);
+
+    //btw
+    var btw = -DegreesOffcourse;
+    document.getElementsByClassName("btw")[0].getElementsByClassName("value")[0].innerHTML = String(btw).slice(0, 4);
+
+  }
+})
+
+
+
 
 const App = (
   <div>

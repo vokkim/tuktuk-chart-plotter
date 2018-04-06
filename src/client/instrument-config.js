@@ -94,7 +94,7 @@ const InstrumentConfigs = {
     className: 'dtw',
     title: 'DTW',
     format: '0',
-    unit: 'kn'
+    unit: 'Nm'
   },
   btw:{
     dataKey: 'performance.btw',
