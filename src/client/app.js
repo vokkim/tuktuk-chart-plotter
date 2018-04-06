@@ -19,7 +19,7 @@ import {
 } from './enums'
 import Map from './map'
 import Connection from './data-connection'
-import {toNauticalMiles, distanceBetweenCoordinates,beringBetweenCoordinates,toDegrees} from './utils'
+import {toKnots, toNauticalMiles, distanceBetweenCoordinates,beringBetweenCoordinates,toDegrees} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 import {settings, clearSettingsFromLocalStorage} from './settings'
@@ -408,16 +408,21 @@ waypointInstrument.onValue(({waypointInstrument , /*settings*/}) => {
     document.getElementsByClassName("dtw")[0].getElementsByClassName("value")[0].innerHTML = String(dtw).slice(0, 4);
 
     // vmg
-    var boatDegrees = toDegrees(waypointInstrument['navigation.courseOverGroundTrue'])
+    var boatDegrees = toDegrees(waypointInstrument['navigation.courseOverGroundMagnetic'])
     var wpDegrees = beringBetweenCoordinates(vesselPos.latitude, vesselPos.longitude, wpPos.lat, wpPos.lng)
     var DegreesOffcourse = Math.abs(wpDegrees-boatDegrees)
     var vmgPourcentage = 100-((DegreesOffcourse)/90*100)
-    var vmg = waypointInstrument['navigation.speedOverGround']*(vmgPourcentage/100)
+    var vmg = toKnots(waypointInstrument['navigation.speedOverGround'])*(vmgPourcentage/100)
     document.getElementsByClassName("vmg")[0].getElementsByClassName("value")[0].innerHTML = String(vmg).slice(0, 4);
 
     // eta
     var eta = dtw/vmg
-    document.getElementsByClassName("eta")[0].getElementsByClassName("value")[0].innerHTML = String(eta).slice(0, 4);
+    if(eta < 0){ eta = 0 }
+    var hhmm = String(eta).split('.')
+    hhmm[1] =  Math.round(Number('0.'+hhmm[1])*60)
+    if(hhmm[1] < 10 ){ hhmm[1] = '0'+String(hhmm[1]) }
+
+    document.getElementsByClassName("eta")[0].getElementsByClassName("value")[0].innerHTML =  hhmm[0]+':'+hhmm[1] ;
 
     //btw
     var btw = -DegreesOffcourse;
