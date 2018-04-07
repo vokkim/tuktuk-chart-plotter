@@ -27,6 +27,16 @@ Plotter accessible at http://localhost:4999/
 To see actual data, you should have a [signalk-server-node](https://github.com/SignalK/signalk-server-node)
 running and maybe some [charts](https://github.com/vokkim/tuktuk-chart-plotter#charts).
 
+# Developement 
+
+Install dependencies:
+
+  `npm install`
+  
+Start server:
+
+  `npm run watch`
+  
 ## Environment variables
 
 - `PORT` = server port, default 4999
