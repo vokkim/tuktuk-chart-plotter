@@ -19,7 +19,7 @@ import {
 } from './enums'
 import Map from './map'
 import Connection from './data-connection'
-import {toKnots, toNauticalMiles, distanceBetweenCoordinates,beringBetweenCoordinates,toDegrees} from './utils'
+import { toRadians, toNauticalMiles, distanceBetweenCoordinates, beringBetweenCoordinates, toDegrees } from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 import {settings, clearSettingsFromLocalStorage} from './settings'
@@ -399,35 +399,26 @@ const waypointInstrument = Bacon.combineTemplate({
 
 waypointInstrument.onValue(({waypointInstrument , /*settings*/}) => {
   if( typeof waypointInstrument['navigation.position'] == 'object'
-    && typeof global.waypointObj == 'object' ) {
+  && typeof global.waypointObj == 'object' ) {
     var wpPos = global.waypointObj._latlng
     var vesselPos = waypointInstrument['navigation.position']
 
-    //dtw 
     var dtw = distanceBetweenCoordinates(vesselPos.latitude, vesselPos.longitude, wpPos.lat, wpPos.lng)
-    document.getElementsByClassName("dtw")[0].getElementsByClassName("value")[0].innerHTML = String(dtw).slice(0, 4);
+    waypointInstrument['performance.dtw'] = dtw*1000
 
-    // vmg
-    var boatDegrees = toDegrees(waypointInstrument['navigation.courseOverGroundMagnetic'])
-    var wpDegrees = beringBetweenCoordinates(vesselPos.latitude, vesselPos.longitude, wpPos.lat, wpPos.lng)
-    var DegreesOffcourse = Math.abs(wpDegrees-boatDegrees)
-    var vmgPourcentage = 100-((DegreesOffcourse)/90*100)
-    var vmg = toKnots(waypointInstrument['navigation.speedOverGround'])*(vmgPourcentage/100)
-    document.getElementsByClassName("vmg")[0].getElementsByClassName("value")[0].innerHTML = String(vmg).slice(0, 4);
+    var wayPointBearing = beringBetweenCoordinates(vesselPos.latitude, vesselPos.longitude, wpPos.lat, wpPos.lng)
+    var boatBearing = toDegrees(waypointInstrument['navigation.courseOverGroundTrue'])
+    var diffBearing = wayPointBearing-boatBearing
+    var btw = Math.abs(diffBearing)
+    waypointInstrument['performance.btw'] = toRadians(diffBearing)
 
-    // eta
+    var vmgPercentage = 1-(btw/90)
+    var vmg = (waypointInstrument['navigation.speedOverGround']*vmgPercentage)
+
+    waypointInstrument['performance.vmg'] = vmg
+
     var eta = dtw/vmg
-    if(eta < 0){ eta = 0 }
-    var hhmm = String(eta).split('.')
-    hhmm[1] =  Math.round(Number('0.'+hhmm[1])*60)
-    if(hhmm[1] < 10 ){ hhmm[1] = '0'+String(hhmm[1]) }
-
-    document.getElementsByClassName("eta")[0].getElementsByClassName("value")[0].innerHTML =  hhmm[0]+':'+hhmm[1] ;
-
-    //btw
-    var btw = -DegreesOffcourse;
-    document.getElementsByClassName("btw")[0].getElementsByClassName("value")[0].innerHTML = String(btw).slice(0, 4);
-
+    waypointInstrument['performance.eta'] = eta
   }
 })
 
