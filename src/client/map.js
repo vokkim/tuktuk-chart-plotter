@@ -104,6 +104,7 @@ function initMap(connection, settings, drawObject) {
   handleInstrumentsToggle()
   handleDrawWaypoint({map, settings})
 
+
   function handleDrawWaypoint({map, settings}) {
     const waypointMarker = Leaf.icon({
       iconUrl: 'path-marker.png',
@@ -111,6 +112,9 @@ function initMap(connection, settings, drawObject) {
       iconAnchor: [10, 10]
     })
 
+    /**
+     * Initiate behaviour or the waypoint button.
+     */
     Bacon.fromEvent(map, 'click')
         .filter(settings.view(L.prop('waypoint')))
         .map(e => {

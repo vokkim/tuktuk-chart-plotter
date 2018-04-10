@@ -392,12 +392,16 @@ class Accordion extends React.Component {
   }
 }
 
-// listen for new data form the connection even if we are not exactly using them.
 const waypointInstrument = Bacon.combineTemplate({
   waypointInstrument : connection.selfData,
 })
 
-waypointInstrument.onValue(({waypointInstrument , /*settings*/}) => {
+/**
+ * This is calculation for 4 Instruments related to waypoint.
+ * Dispite others instrument that display data from the signalK server.
+ * Those four are generated inside upon new location, speed and course received from server.
+ */
+waypointInstrument.onValue(({waypointInstrument }) => {
   if( typeof waypointInstrument['navigation.position'] == 'object'
   && typeof global.waypointObj == 'object' ) {
     var wpPos = global.waypointObj._latlng
