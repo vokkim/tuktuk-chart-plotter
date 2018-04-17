@@ -3,3 +3,5 @@ public/bundle*
 .bundle.css
 npm-debug.*
 client-config.json
+charts/*
+!charts/.gitkeep
