@@ -7,7 +7,7 @@ function connect() {
   if (!navigator.geolocation || !navigator.geolocation.watchPosition) {
     throw 'Missing geolocation API'
   }
-  const success = (event) => {
+  const success = event => {
     const position = {
       path: 'navigation.position',
       latitude: event.coords.latitude,
@@ -24,11 +24,11 @@ function connect() {
     const vesselData = {
       'navigation.position': position,
       'navigation.speedOverGround': sog,
-      'navigation.headingTrue': heading,
+      'navigation.headingTrue': heading
     }
     rawStream.push(vesselData)
   }
-  const error = (err) => {
+  const error = err => {
     console.log('Geolocation error', err)
   }
 
@@ -47,5 +47,3 @@ function connect() {
 }
 
 module.exports = connect
-
-

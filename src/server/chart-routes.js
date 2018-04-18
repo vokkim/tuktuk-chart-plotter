@@ -14,13 +14,16 @@ refreshChartProviders().onValue(providers => console.log(`Initial chart provider
 api.get('/charts/', (req, res) => {
   const providers = refreshChartProviders()
   providers.onError(err => {
-    console.error(`Error refreshing chart providers:`, err)
+    console.error('Error refreshing chart providers:', err)
     res.sendStatus(500)
   })
 
   providers.onValue(providers => {
     const sanitized = _.map(_.values(providers), provider => {
-      return _.merge(_.omit(provider, ['db']), {tilemapUrl: `/charts/${provider.name}/{z}/{x}/{y}`, type: 'tilelayer'})
+      return _.merge(_.omit(provider, ['db']), {
+        tilemapUrl: `/charts/${provider.name}/{z}/{x}/{y}`,
+        type: 'tilelayer'
+      })
     })
     res.send(sanitized)
   })
@@ -51,10 +54,14 @@ function refreshChartProviders() {
   const providers = Bacon.fromNodeCallback(MBTiles.list, settings.chartsPath)
     .flatMap(files => Bacon.combineAsArray(_.map(files, chartFileToProvider)))
     .map(providers => {
-      return _.reduce(providers, (sum, p) => {
-        sum[p.name] = p
-        return sum
-      }, {})
+      return _.reduce(
+        providers,
+        (sum, p) => {
+          sum[p.name] = p
+          return sum
+        },
+        {}
+      )
     })
     .doAction(providers => {
       chartProviders = providers
@@ -76,11 +83,20 @@ function chartFileToProvider(uri) {
     bus.end()
   })
   return bus.flatMap(db => {
-    return Bacon.fromNodeCallback(db, 'getInfo')
-      .map(metadata => {
-        const fromMetadata = _.pick(metadata, ['bounds', 'minzoom', 'maxzoom', 'type', 'format', 'attribution', 'center', 'description', 'scheme'])
-        return _.merge({name, file: pathname, db}, fromMetadata)
-      })
+    return Bacon.fromNodeCallback(db, 'getInfo').map(metadata => {
+      const fromMetadata = _.pick(metadata, [
+        'bounds',
+        'minzoom',
+        'maxzoom',
+        'type',
+        'format',
+        'attribution',
+        'center',
+        'description',
+        'scheme'
+      ])
+      return _.merge({name, file: pathname, db}, fromMetadata)
+    })
   })
 }
 

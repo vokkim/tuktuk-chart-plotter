@@ -18,10 +18,12 @@ class Map extends React.Component {
   }
   render() {
     const {settings} = this.props
-    const classes = settings.map(v => classNames('map-wrapper', {'instruments-visible': v.showInstruments, 'menu-visible': v.showMenu}))
+    const classes = settings.map(v =>
+      classNames('map-wrapper', {'instruments-visible': v.showInstruments, 'menu-visible': v.showMenu})
+    )
     return (
       <div className={classes}>
-        <div id='map'></div>
+        <div id="map" />
       </div>
     )
   }
@@ -45,7 +47,13 @@ function initMap(connection, settings, drawObject) {
   addCharts(map, initialSettings.chartProviders, settings.map('.chartProviders'))
   const vesselIcons = createVesselIcons(_.get(initialSettings.data, ['0', 'type']) === 'geolocation')
 
-  const myVessel = Leaf.marker([0, 0], {icon: resolveIcon(vesselIcons, initialSettings.zoom), draggable: false, zIndexOffset: 990, rotationOrigin: 'center center', rotationAngle: 0})
+  const myVessel = Leaf.marker([0, 0], {
+    icon: resolveIcon(vesselIcons, initialSettings.zoom),
+    draggable: false,
+    zIndexOffset: 990,
+    rotationOrigin: 'center center',
+    rotationAngle: 0
+  })
   myVessel.addTo(map)
   const pointerEnd = Leaf.circle([0, 0], {radius: 20, color: 'red', fillOpacity: 0})
   pointerEnd.addTo(map)
@@ -63,20 +71,21 @@ function initMap(connection, settings, drawObject) {
       myVessel.setLatLng(newPos)
     }
 
-    const course = settings.course === COG ? vesselData['navigation.courseOverGroundTrue'] : vesselData['navigation.headingTrue']
+    const course =
+      settings.course === COG ? vesselData['navigation.courseOverGroundTrue'] : vesselData['navigation.headingTrue']
     if (course) {
       myVessel.setRotationAngle(toDegrees(course))
     } else {
       myVessel.setRotationAngle(0)
     }
 
-    const speed =  vesselData['navigation.speedOverGround']
+    const speed = vesselData['navigation.speedOverGround']
     const extensionLineCoordinates = calculateExtensionLine(position, course, speed, settings.extensionLine)
     if (extensionLineCoordinates) {
       pointer.setLatLngs([extensionLineCoordinates.start, extensionLineCoordinates.end])
       pointerEnd.setLatLng(extensionLineCoordinates.end)
     } else {
-      pointer.setLatLngs([[0, 0], [0,0]])
+      pointer.setLatLngs([[0, 0], [0, 0]])
       pointerEnd.setLatLng([0, 0])
     }
     if (settings.follow && (extensionLineCoordinates || position)) {
@@ -93,17 +102,20 @@ function initMap(connection, settings, drawObject) {
   handleDragAndFollow()
   handleInstrumentsToggle()
   function handleMapZoom() {
-    settings.map('.zoom').skipDuplicates().onValue(zoom => {
-      map.setZoom(zoom)
-      myVessel.setIcon(resolveIcon(vesselIcons, zoom))
-      if (zoom < 12) {
-        pointer.setStyle({opacity: 0})
-        pointerEnd.setStyle({opacity: 0})
-      } else {
-        pointer.setStyle({opacity: 1})
-        pointerEnd.setStyle({opacity: 1})
-      }
-    })
+    settings
+      .map('.zoom')
+      .skipDuplicates()
+      .onValue(zoom => {
+        map.setZoom(zoom)
+        myVessel.setIcon(resolveIcon(vesselIcons, zoom))
+        if (zoom < 12) {
+          pointer.setStyle({opacity: 0})
+          pointerEnd.setStyle({opacity: 0})
+        } else {
+          pointer.setStyle({opacity: 1})
+          pointerEnd.setStyle({opacity: 1})
+        }
+      })
 
     const zoomEnd = Bacon.fromEvent(map, 'zoomend')
     zoomEnd.onValue(() => {
@@ -125,7 +137,8 @@ function initMap(connection, settings, drawObject) {
   }
 
   function handleInstrumentsToggle() {
-    settings.map('.showInstruments')
+    settings
+      .map('.showInstruments')
       .changes()
       .merge(settings.map('.showMenu').changes())
       .skipDuplicates()
@@ -144,44 +157,60 @@ function handleAisTargets({map, aisData, settings}) {
     iconAnchor: [10, 15]
   })
   const aisEnabled = settings.map(s => _.get(s, 'ais.enabled', false)).skipDuplicates()
-  aisEnabled.not().filter(_.identity).onValue(() => {
-    _.each(aisMarkers, marker => marker.remove())
-    aisMarkers = {}
-  })
-  Bacon.interval(60*1000, true).filter(aisEnabled).onValue(() => {
-    const now = Date.now()
-    const expired = _(aisMarkers)
-      .toPairs()
-      .filter(v => now - v[1]._updatedAt > 180*1000) // Remove markers if not updated in 3 minutes
-      .value()
-    aisMarkers = _.omit(aisMarkers, _.map(expired, '0'))
-    _.each(expired, v => v[1].remove())
-  })
-  aisData.filter(aisEnabled).skipDuplicates().onValue(vessels => {
-    _.each(vessels, (v, k) => {
-      const position = v['navigation.position']
-      const course = toDegrees(_.get(v, ['navigation.courseOverGroundTrue', 'value']))
-      const sog = toKnots(_.get(v, ['navigation.speedOverGround', 'value']))
-
-      if (aisMarkers[k]) {
-        course && aisMarkers[k].setRotationAngle(course)
-        position && aisMarkers[k].setLatLng([position.value.latitude, position.value.longitude])
-      } else if (position && course) {
-        const latlng = [position.value.latitude, position.value.longitude]
-        const vesselMarker = Leaf.marker(latlng, {icon: aisTargetMarker, draggable: false, zIndexOffset: 980, rotationOrigin: 'center center', rotationAngle: course})
-        vesselMarker.addTo(map)
-        aisMarkers[k] = vesselMarker
-      }
-      if (aisMarkers[k]) {
-        const name = _.get(v, 'name.value') || v.name || 'Unknown'
-        const formattedSog = numeral(sog).format('0.0')
-        const formattedCog = numeral(course).format('0')
-        const tooltip = `<div class='name'>${name}</div><div>SOG: ${formattedSog} kn</div><div>COG: ${formattedCog}</div>`
-        aisMarkers[k].bindTooltip(tooltip, {className: 'aisTooltip'})
-        aisMarkers[k]._updatedAt = Date.now()
-      }
+  aisEnabled
+    .not()
+    .filter(_.identity)
+    .onValue(() => {
+      _.each(aisMarkers, marker => marker.remove())
+      aisMarkers = {}
     })
-  })
+
+  Bacon.interval(60 * 1000, true) // Check for expired AIS targets every 60s
+    .filter(aisEnabled)
+    .onValue(() => {
+      const now = Date.now()
+      const expired = _(aisMarkers)
+        .toPairs()
+        .filter(v => now - v[1]._updatedAt > 180 * 1000) // Remove markers if not updated in 3 minutes
+        .value()
+      aisMarkers = _.omit(aisMarkers, _.map(expired, '0'))
+      _.each(expired, v => v[1].remove())
+    })
+
+  aisData
+    .filter(aisEnabled)
+    .skipDuplicates()
+    .onValue(vessels => {
+      _.each(vessels, (v, k) => {
+        const position = v['navigation.position']
+        const course = toDegrees(_.get(v, ['navigation.courseOverGroundTrue', 'value']))
+        const sog = toKnots(_.get(v, ['navigation.speedOverGround', 'value']))
+
+        if (aisMarkers[k]) {
+          course && aisMarkers[k].setRotationAngle(course)
+          position && aisMarkers[k].setLatLng([position.value.latitude, position.value.longitude])
+        } else if (position && course) {
+          const latlng = [position.value.latitude, position.value.longitude]
+          const vesselMarker = Leaf.marker(latlng, {
+            icon: aisTargetMarker,
+            draggable: false,
+            zIndexOffset: 980,
+            rotationOrigin: 'center center',
+            rotationAngle: course
+          })
+          vesselMarker.addTo(map)
+          aisMarkers[k] = vesselMarker
+        }
+        if (aisMarkers[k]) {
+          const name = _.get(v, 'name.value') || v.name || 'Unknown'
+          const formattedSog = numeral(sog).format('0.0')
+          const formattedCog = numeral(course).format('0')
+          const tooltip = `<div class='name'>${name}</div><div>SOG: ${formattedSog} kn</div><div>COG: ${formattedCog}</div>`
+          aisMarkers[k].bindTooltip(tooltip, {className: 'aisTooltip'})
+          aisMarkers[k]._updatedAt = Date.now()
+        }
+      })
+    })
 }
 
 function handleDrawPath({map, settings, drawObject}) {
@@ -215,18 +244,29 @@ function handleDrawPath({map, settings, drawObject}) {
     lastMoveAt = Date.now()
     const latlngs = _.map(path, marker => marker._latlng)
     pathPolyline.setLatLngs(latlngs)
-    const distance = _.reduce(path, (sum, marker, i) => {
-      if (i > 0) {
-        return sum + path[i-1]._latlng.distanceTo(marker._latlng)
-      } else {
-        return 0
-      }
-    }, 0)
+    const distance = _.reduce(
+      path,
+      (sum, marker, i) => {
+        if (i > 0) {
+          return sum + path[i - 1]._latlng.distanceTo(marker._latlng)
+        } else {
+          return 0
+        }
+      },
+      0
+    )
     drawObject.view(L.prop('distance')).set(distance)
   }
 
-  del.filter(_.identity).changes()
-    .merge(settings.map('.drawMode').skipDuplicates().changes())
+  del
+    .filter(_.identity)
+    .changes()
+    .merge(
+      settings
+        .map('.drawMode')
+        .skipDuplicates()
+        .changes()
+    )
     .onValue(() => {
       _.each(path, marker => marker.remove())
       path = []
@@ -236,7 +276,6 @@ function handleDrawPath({map, settings, drawObject}) {
 }
 
 function addCharts(map, providers, providersP) {
-
   // Initialize charts based on initial providers
   const mapLayers = _.map(providers, provider => {
     const {index, name, maxzoom, minzoom, tilemapUrl, enabled, type, center} = provider
@@ -253,13 +292,13 @@ function addCharts(map, providers, providersP) {
     map.createPane(pane)
     const bounds = parseChartBounds(provider)
     // 'detectRetina' messes up Leaflet maxNativeZoom, fix with a hack:
-    const maxNativeZoom = maxzoom ? (maxzoom - (Leaf.Browser.retina ? 1 : 0)) : undefined
-    const minNativeZoom = minzoom ? (minzoom + (Leaf.Browser.retina ? 1 : 0)) : undefined
+    const maxNativeZoom = maxzoom ? maxzoom - (Leaf.Browser.retina ? 1 : 0) : undefined
+    const minNativeZoom = minzoom ? minzoom + (Leaf.Browser.retina ? 1 : 0) : undefined
     const layer = Leaf.tileLayer(tilemapUrl, {detectRetina: true, bounds, maxNativeZoom, minNativeZoom, pane})
 
     if (enabled) {
       layer.addTo(map)
-      if (_.isArray(center) && center.length == 2) {
+      if (_.isArray(center) && center.length === 2) {
         map.panTo([center[1], center[0]])
       } else if (bounds) {
         map.fitBounds(bounds)
@@ -269,16 +308,19 @@ function addCharts(map, providers, providersP) {
   })
 
   // Toggle chart layers on/off based on enabled providers
-  providersP.skipDuplicates().skip(1).onValue(providers => {
-    _.each(providers, ({enabled, id}) => {
-      const mapLayer = _.find(mapLayers, ({provider}) => provider.id === id)
-      if (enabled) {
-        mapLayer.layer.addTo(map)
-      } else {
-        mapLayer.layer.removeFrom(map)
-      }
+  providersP
+    .skipDuplicates()
+    .skip(1)
+    .onValue(providers => {
+      _.each(providers, ({enabled, id}) => {
+        const mapLayer = _.find(mapLayers, ({provider}) => provider.id === id)
+        if (enabled) {
+          mapLayer.layer.addTo(map)
+        } else {
+          mapLayer.layer.removeFrom(map)
+        }
+      })
     })
-  })
 }
 
 function addBasemap(map) {
@@ -290,8 +332,10 @@ function addBasemap(map) {
     fillOpacity: 1
   }
   const baseMap = api.get({url: 'world-base.geo.json'})
-  baseMap.onError(e => console.log(`Unable to fetch base map`, e))
-  baseMap.onValue(worldBaseGeoJSON => Leaf.geoJson(worldBaseGeoJSON, {clickable: false, style: basemapStyle, pane: 'basemap'}).addTo(map))
+  baseMap.onError(e => console.log('Unable to fetch base map', e))
+  baseMap.onValue(worldBaseGeoJSON =>
+    Leaf.geoJson(worldBaseGeoJSON, {clickable: false, style: basemapStyle, pane: 'basemap'}).addTo(map)
+  )
 }
 
 function calculateExtensionLine(position, course, speed, extensionLineSetting) {
@@ -302,8 +346,16 @@ function calculateExtensionLine(position, course, speed, extensionLineSetting) {
   if (position && position.latitude && position.longitude && course && speed > 0.5) {
     const distance = speed * time // Speed in m/s
     const start = [position.latitude, position.longitude]
-    const destination = computeDestinationPoint({lat: position.latitude, lon: position.longitude}, distance, toDegrees(course))
-    const middle = computeDestinationPoint({lat: position.latitude, lon: position.longitude}, distance / 2, toDegrees(course))
+    const destination = computeDestinationPoint(
+      {lat: position.latitude, lon: position.longitude},
+      distance,
+      toDegrees(course)
+    )
+    const middle = computeDestinationPoint(
+      {lat: position.latitude, lon: position.longitude},
+      distance / 2,
+      toDegrees(course)
+    )
     return {
       start,
       middle: [middle.latitude, middle.longitude],
@@ -312,7 +364,6 @@ function calculateExtensionLine(position, course, speed, extensionLineSetting) {
   }
   return undefined
 }
-
 
 function createVesselIcons(shouldUseRoundIcon) {
   if (shouldUseRoundIcon) {
@@ -358,14 +409,14 @@ function parseChartBounds(provider) {
     return undefined
   }
   if (!_.isArray(provider.bounds) || provider.bounds.length !== 4) {
-    throw new Error(`Unrecognized bounds format: ` + JSON.stringify(provider.bounds))
+    throw new Error('Unrecognized bounds format: ' + JSON.stringify(provider.bounds))
   }
 
   const corner1 = Leaf.latLng(provider.bounds[1], provider.bounds[0])
   const corner2 = Leaf.latLng(provider.bounds[3], provider.bounds[2])
   const bounds = Leaf.latLngBounds(corner1, corner2)
   if (!bounds.isValid()) {
-    throw new Error(`Invalid bounds: ` + JSON.stringify(provider.bounds))
+    throw new Error('Invalid bounds: ' + JSON.stringify(provider.bounds))
   }
   return bounds
 }

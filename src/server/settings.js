@@ -3,7 +3,7 @@ import path from 'path'
 
 const environmentVariables = {
   port: process.env.PORT,
-  production: process.env.NODE_ENV == 'production',
+  production: process.env.NODE_ENV === 'production',
   chartsPath: process.env.CHARTS_PATH,
   clientConfigFile: process.env.CLIENT_CONFIG_FILE
 }

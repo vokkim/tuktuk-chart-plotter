@@ -50,7 +50,7 @@ chartProviders.onValue(charts => {
 })
 
 chartProviders.onError(e => {
-  console.error(`Error fetching chart providers`)
+  console.error('Error fetching chart providers')
   console.error(e)
 })
 
@@ -60,42 +60,78 @@ settings
     return Object.assign({}, v, {hiddenChartProviders: _.map(hiddenChartProviders, 'id')})
   })
   .map(v => _.omit(v, ['chartProviders', 'drawMode', 'data', 'loadingChartProviders', 'zoom']))
-  .skipDuplicates((a,b) => JSON.stringify(a) === JSON.stringify(b))
+  .skipDuplicates((a, b) => JSON.stringify(a) === JSON.stringify(b))
   .onValue(v => {
     Store.set(LOCAL_STORAGE_KEY, v)
   })
 
 function fetchLocalCharts(provider, hiddenChartProviders) {
-  const url = `/charts/`
-  return api.get({url}).map(_.values).flatMap(charts => {
-    return Bacon.fromArray(_.map(charts, chart => {
-      const from = _.pick(chart, ['tilemapUrl', 'index', 'type', 'name', 'minzoom', 'maxzoom', 'center', 'description', 'format', 'bounds'])
-      return _.merge({
-        id: chart.name,
-        index: provider.index || 0,
-        enabled: isChartHidden(hiddenChartProviders, chart.name)
-      }, from)
-    }))
-  })
+  const url = '/charts/'
+  return api
+    .get({url})
+    .map(_.values)
+    .flatMap(charts => {
+      return Bacon.fromArray(
+        _.map(charts, chart => {
+          const from = _.pick(chart, [
+            'tilemapUrl',
+            'index',
+            'type',
+            'name',
+            'minzoom',
+            'maxzoom',
+            'center',
+            'description',
+            'format',
+            'bounds'
+          ])
+          return _.merge(
+            {
+              id: chart.name,
+              index: provider.index || 0,
+              enabled: isChartHidden(hiddenChartProviders, chart.name)
+            },
+            from
+          )
+        })
+      )
+    })
 }
 
 function fetchSignalKCharts(provider, hiddenChartProviders) {
   const address = parseChartProviderAddress(provider.address)
   const url = `${address}/signalk/v1/api/resources/charts`
-  return api.get({url}).map(_.values).flatMap(charts => {
-    return Bacon.fromArray(_.map(charts, chart => {
-      const tilemapUrl = address + chart.tilemapUrl
-      const from = _.pick(chart, ['type', 'name', 'minzoom', 'maxzoom', 'center', 'description', 'format', 'bounds'])
-      return _.merge({
-        id: chart.name,
-        tilemapUrl,
-        minzoom: MIN_ZOOM,
-        maxzoom: MAX_ZOOM,
-        index: provider.index || 0 ,
-        enabled: !isChartHidden(hiddenChartProviders, chart.name)
-      }, from)
-    }))
-  })
+  return api
+    .get({url})
+    .map(_.values)
+    .flatMap(charts => {
+      return Bacon.fromArray(
+        _.map(charts, chart => {
+          const tilemapUrl = address + chart.tilemapUrl
+          const from = _.pick(chart, [
+            'type',
+            'name',
+            'minzoom',
+            'maxzoom',
+            'center',
+            'description',
+            'format',
+            'bounds'
+          ])
+          return _.merge(
+            {
+              id: chart.name,
+              tilemapUrl,
+              minzoom: MIN_ZOOM,
+              maxzoom: MAX_ZOOM,
+              index: provider.index || 0,
+              enabled: !isChartHidden(hiddenChartProviders, chart.name)
+            },
+            from
+          )
+        })
+      )
+    })
 }
 
 const isChartHidden = (hiddenChartProviders, requestedChartId) => {
@@ -104,7 +140,7 @@ const isChartHidden = (hiddenChartProviders, requestedChartId) => {
 
 function parseChartProviderAddress(address) {
   if (_.isEmpty(address)) {
-    throw `Empty chart provider address!`
+    throw 'Empty chart provider address!'
   }
   if (_.isEmpty(address.split(':')[0])) {
     // Relative address such as ':80'

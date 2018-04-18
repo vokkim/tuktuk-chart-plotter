@@ -7,21 +7,21 @@ import chartRoutes from './chart-routes'
 
 const app = express()
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
   const clientConfig = Bacon.fromNodeCallback(fs, 'readFile', settings.clientConfigFile)
     .flatMap(config => {
       try {
         return Bacon.once(JSON.parse(config))
-      } catch(e) {
+      } catch (e) {
         return Bacon.once(new Bacon.Error(e))
       }
     })
     .flatMapError(err => {
       if (err.code === 'ENOENT') {
-        console.log(`No client config file found`)
+        console.log('No client config file found')
         return Bacon.once({})
       } else {
-        console.error(`Error loading client config file: `, err)
+        console.error('Error loading client config file: ', err)
         return Bacon.once({})
       }
     })
@@ -32,8 +32,7 @@ app.get('/', function (req, res) {
 
 app.use('/', express.static(path.join(__dirname, '../../public')))
 
-
-app.listen(settings.port, function () {
+app.listen(settings.port, function() {
   console.log(`Listening ${settings.port}`)
 })
 

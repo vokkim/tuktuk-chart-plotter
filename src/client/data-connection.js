@@ -4,7 +4,7 @@ import GeolocationProvider from './provider-geolocation'
 
 function connect({providers, settings}) {
   if (providers.length > 1) {
-    throw `Only 1 data provider supported for now`
+    throw 'Only 1 data provider supported for now'
   }
   if (providers.length === 0) {
     return {
