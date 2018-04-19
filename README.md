@@ -8,24 +8,47 @@ Very much _WIP_.
 
 <img src="https://github.com/vokkim/tuktuk-chart-plotter/raw/master/preview-1.jpg" alt="Tuktuk plotter with Finnish charts" width="300" />|<img src="https://github.com/vokkim/tuktuk-chart-plotter/raw/master/preview-2.jpg" alt="Tuktuk plotter with NOAA charts" width="300" />
 
-# Install
+# Usage
+
+Install "Tuktuk chart plotter" webapp from the Signal K Appstore together 
+with [@signalk/charts-plugin](https://www.npmjs.com/package/@signalk/charts-plugin).
+
+Configure charts plugin to server some charts and open the Tuktuk chart plotter in 
+`<signalk-server-address>/tuktuk-chart-plotter/`.
+
+Some example MBTiles charts can be found from:
+- Finnish nautical charts: https://github.com/vokkim/rannikkokartat-mbtiles
+- NOAA charts: https://github.com/vokkim/noaa-nautical-charts
+
+# Developing
 
 Install dependencies:
 
   `npm install`
 
-Bundle assets:
+Running tests (only eslint for now):
 
-  `npm run bundle`
+  `npm run test`
 
-Start server:
+Start development server:
 
-  `npm run start`
+  `npm run watch`
 
 Plotter accessible at http://localhost:4999/
-
 To see actual data, you should have a [signalk-server-node](https://github.com/SignalK/signalk-server-node)
 running and maybe some [charts](https://github.com/vokkim/tuktuk-chart-plotter#charts).
+
+## Code style
+
+Tuktuk uses uses [eslint](http://eslint.org/) and [Prettier](https://prettier.io/) 
+to enforce and format code style. To auto-format the code run:
+
+  `npm run lint-fix`
+
+# Local server
+
+**Tuktuk ships with a local server intended for development use only. 
+For production use, please install Tuktuk as a Signal K Webapp**
 
 ## Environment variables
 
@@ -33,7 +56,7 @@ running and maybe some [charts](https://github.com/vokkim/tuktuk-chart-plotter#c
 - `CHARTS_PATH` = location for chart files (`.mbtiles`), default `charts/`
 - `CLIENT_CONFIG_FILE` = client config file, default `client-config.json`
 
-# Client config
+## Client config
 
 - When the plotter is ran with a local server using `npm run start` or `npm run watch`, the browser will receive a configuration file defined by the `CLIENT_CONFIG_FILE` environment variable.
 
@@ -69,9 +92,9 @@ Example config:
 ```
 
 
-# Data providers
+## Data providers
 
-## Signal K
+### Signal K
 
 Chart plotter is designed to work with [Signal K](http://signalk.org/):
 
@@ -87,7 +110,7 @@ Chart plotter is designed to work with [Signal K](http://signalk.org/):
 ...
 ```
 
-## Browser Geolocation API
+### Browser Geolocation API
 
 To use the [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation), add `geolocation` provider:
 ``` javascript
@@ -99,14 +122,7 @@ To use the [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Ge
 ...
 ```
 
-
-# Charts
-
-Some example MBTiles charts can be found from:
-- Finnish nautical charts: https://github.com/vokkim/rannikkokartat-mbtiles
-- NOAA charts: https://github.com/vokkim/noaa-nautical-charts
-
-## Local charts
+### Local charts
 
 Put charts in [MBTiles](https://github.com/mapbox/mbtiles-spec) format to your `CHARTS_PATH`.
 Files must end with `.mbtiles` postfix. Charts found by the chart plotter are listed in `http://localhost:4999/charts/`.
@@ -123,7 +139,7 @@ Local charts are configured in `client-config.json` by adding `local` chart prov
 ...
 ```
 
-## Signal K charts
+### Signal K charts
 
 Map tiles hosted by Signal K server are configured in `client-config.json` by adding `signalk` chart provider:
 ``` javascript
@@ -138,7 +154,7 @@ Map tiles hosted by Signal K server are configured in `client-config.json` by ad
 ...
 ```
 
-## Online charts
+### Online charts
 
 Other charts in `client-config.json` are of type `tilelayer`:
 ``` javascript
@@ -155,6 +171,6 @@ Other charts in `client-config.json` are of type `tilelayer`:
 ]
 ```
 
-## License
+# License
 
 MIT
