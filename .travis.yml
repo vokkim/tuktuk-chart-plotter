@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - "lts/*"
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - npm run test
+    - stage: bundle
+      script:
+        - npm run bundle
