@@ -18,6 +18,7 @@ import {
   EXTENSION_LINE_10_MIN
 } from './enums'
 import Map from './map'
+import Ais from './ais'
 import Connection from './data-connection'
 import {toNauticalMiles} from './utils'
 import InstrumentConfig from './instrument-config'
@@ -394,7 +395,12 @@ const App = (
             </div>
           )
         } else {
-          return <Map connection={connection} settings={settings} drawObject={drawObject} />
+          return (
+            <div>
+              <Map connection={connection} settings={settings} drawObject={drawObject} />
+              <Ais connection={connection} settings={settings} />
+            </div>
+          )
         }
       })}
   </div>
