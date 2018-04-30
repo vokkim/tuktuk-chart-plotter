@@ -48,16 +48,16 @@ function initAisData(aisData, settings) {
     .filter(aisEnabled)
     .skipDuplicates()
     .onValue(vessels => {
-      _.each(vessels, (v, k) => {
-        const position = v['navigation.position']
-        const course = toDegrees(_.get(v, ['navigation.courseOverGroundTrue', 'value']))
-        if (aisMarkers[k]) {
-          updateVesselMarker(aisMarkers[k], {position, course})
+      _.each(vessels, (data, vesselId) => {
+        const position = _.get(data, 'navigation.position')
+        const course = toDegrees(_.get(data, 'navigation.courseOverGroundTrue.value'))
+        if (aisMarkers[vesselId]) {
+          updateVesselMarker(aisMarkers[vesselId], {position, course})
         } else if (position && course) {
-          aisMarkers[k] = addVesselMarker(map, {position, course})
+          aisMarkers[vesselId] = addVesselMarker(map, {position, course})
         }
-        if (aisMarkers[k]) {
-          setMarkerTooltip(aisMarkers[k], v)
+        if (aisMarkers[vesselId]) {
+          setMarkerTooltip(aisMarkers[vesselId], data)
         }
       })
     })
@@ -83,8 +83,8 @@ function addVesselMarker(map, {position, course}) {
 
 function setMarkerTooltip(marker, data) {
   const name = _.get(data, 'name.value') || data.name || 'Unknown'
-  const sog = toKnots(_.get(data, ['navigation.speedOverGround', 'value']))
-  const course = toDegrees(_.get(data, ['navigation.courseOverGroundTrue', 'value']))
+  const sog = toKnots(_.get(data, 'navigation.speedOverGround.value'))
+  const course = toDegrees(_.get(data, 'navigation.courseOverGroundTrue.value'))
   const formattedSog = numeral(sog).format('0.0')
   const formattedCog = numeral(course).format('0')
   const tooltip = `<div class='name'>${name}</div><div>SOG: ${formattedSog} kn</div><div>COG: ${formattedCog}</div>`

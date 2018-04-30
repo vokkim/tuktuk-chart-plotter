@@ -111,18 +111,13 @@ function parseAISData({address, rawStream, settings}) {
       return enabled ? getInitialAISData(address) : Bacon.once()
     })
     .merge(aisStream)
-    .scan({delta: [], full: {}}, (previous, vesselData) => {
-      const delta = _.reduce(
-        vesselData,
-        (sum, row) => {
-          if (!isSelf(row.vessel)) {
-            sum[row.vessel] = _.merge(previous.full[row.vessel], row.data)
-          }
-          return sum
-        },
-        {}
-      )
-      return {delta, full: _.merge(previous.full, delta)}
+    .scan({delta: {}, full: {}}, (previous, data) => {
+      if (isSelf(data.vessel)) {
+        return previous
+      }
+      const full = _.merge(previous.full, _.omitBy(data, (value, key) => isSelf(key)))
+      const delta = _.pick(full, _.keys(data))
+      return {delta, full}
     })
 
   const deltaAisData = fullAisData.map('.delta').filter(d => !_.isEmpty(d))
@@ -133,55 +128,26 @@ function parseAISData({address, rawStream, settings}) {
 }
 
 function singleDeltaMessageToAisData(msg) {
-  return _(msg.updates)
-    .map(u =>
-      _.map(u.values, v => {
-        const isName = v.value && v.value.name && _.isEmpty(v.path)
-        const isMmsi = v.value && v.value.mmsi && _.isEmpty(v.path)
-        const path = (isName && 'name') || (isMmsi && 'mmsi') || v.path
-        const value = (isName && v.value.name) || (isMmsi && v.value.mmsi) || v.value
-        const data = {
-          timestamp: u.timestamp,
-          path,
-          value
-        }
-        return {vessel: msg.context.substring(8), data: {[path]: data}}
+  const data = _.reduce(
+    msg.updates,
+    (sum, update) => {
+      const {timestamp} = update
+      _.each(update.values, value => {
+        _.set(sum, value.path + '.value', value.value)
+        _.set(sum, value.path + '.timestamp', timestamp)
       })
-    )
-    .flatten()
-    .value()
+      return sum
+    },
+    {}
+  )
+
+  return {[msg.context.substring(8)]: data}
 }
 
 function getInitialAISData(address) {
   const protocol = window.location.protocol
   const url = `${protocol}//${parseAddress(address)}/signalk/v1/api/`
-  return api.get({url}).map(data => {
-    const {self} = data
-    return _.reduce(
-      data.vessels,
-      (sum, vessel, key) => {
-        if (key === self) {
-          return sum
-        }
-        const navigationData = _.reduce(
-          vessel.navigation,
-          (sum, v, key) => {
-            const path = `navigation.${key}`
-            const value = v.value ? v.value : _.omit(v, ['$source', 'timestamp', 'pgn'])
-            const timestamp = v.timestamp
-            sum[path] = {path, timestamp, value}
-            return sum
-          },
-          {}
-        )
-
-        const data = _.merge({name: vessel.name}, navigationData)
-        sum.push({vessel: key, data})
-        return sum
-      },
-      []
-    )
-  })
+  return api.get({url}).map('.vessels')
 }
 
 function parseAddress(address) {
