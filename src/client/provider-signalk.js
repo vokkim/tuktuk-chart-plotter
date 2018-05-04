@@ -52,15 +52,7 @@ function connect({address, settings}) {
   }
 
   const signalk = new SignalK.Client()
-  const connection = signalk.connectDelta(
-    parseAddress(address),
-    onMessage,
-    onConnect,
-    onDisconnect,
-    onError,
-    onDisconnect,
-    'none'
-  )
+  signalk.connectDelta(parseAddress(address), onMessage, onConnect, onDisconnect, onError, onDisconnect, 'none')
   const selfStream = rawStream.filter(msg => isSelf(msg.context))
 
   const updates = selfStream.map(msg => {
@@ -86,48 +78,61 @@ function connect({address, settings}) {
     })
     .debounceImmediate(1000)
 
-  const aisData = selfStream.take(1).flatMap(() => {
-    const {aisData} = parseAISData({connection, address, rawStream, settings})
-    return aisData
-  })
+  const {aisData, getVesselAisData} = parseAISData({selfStream, address, rawStream, settings})
 
   return {
     connectionState: connectionState,
     rawStream,
     selfData,
-    aisData
+    aisData,
+    getVesselAisData
   }
 }
 
-function parseAISData({address, rawStream, settings}) {
-  const aisEnabled = settings
-    .changes()
-    .map(s => _.get(s, 'ais.enabled', false))
-    .skipDuplicates()
+function parseAISData({selfStream, address, rawStream, settings}) {
+  const hasSelf = selfStream
+    .take(1)
+    .map(true)
+    .toProperty(false)
+  const aisEnabled = settings.map(s => _.get(s, 'ais.enabled', false)).skipDuplicates()
   //TODO: Subscribe / unsubscribe for AIS vessels
-  const aisStream = rawStream.filter(msg => !isSelf(msg.context)).map(singleDeltaMessageToAisData)
-  const fullAisData = aisEnabled
-    .flatMapLatest(enabled => {
-      return enabled ? getInitialAISData(address) : Bacon.once()
+  const aisStream = rawStream
+    .filter(aisEnabled)
+    .map(singleDeltaMessageToAisData)
+    .bufferWithTimeOrCount(1000, 100)
+    .map(deltas => _.reduce(deltas, _.merge, {}))
+  const fullAisData = Bacon.combineTemplate({
+    hasSelf,
+    aisEnabled
+  })
+    .flatMapLatest(({hasSelf, aisEnabled}) => {
+      return hasSelf && aisEnabled ? getInitialAISData(address).concat(aisStream) : Bacon.once()
     })
-    .merge(aisStream)
     .scan({delta: {}, full: {}}, (previous, data) => {
-      if (isSelf(data.vessel)) {
-        return previous
-      }
-      const full = _.merge(previous.full, _.omitBy(data, (value, key) => isSelf(key)))
+      const full = _.merge({}, previous.full, _.omitBy(data, (value, key) => isSelf(key)))
       const delta = _.pick(full, _.keys(data))
       return {delta, full}
     })
 
   const deltaAisData = fullAisData.map('.delta').filter(d => !_.isEmpty(d))
 
+  function getVesselAisData(vesselId) {
+    return fullAisData
+      .map(data => data.full[vesselId])
+      .filter(_.identity)
+      .skipDuplicates(_.isEqual)
+  }
+
   return {
-    aisData: deltaAisData
+    aisData: deltaAisData,
+    getVesselAisData
   }
 }
 
 function singleDeltaMessageToAisData(msg) {
+  if (!msg.context) {
+    return {} // Not a proper SK delta message
+  }
   const data = _.reduce(
     msg.updates,
     (sum, update) => {
@@ -140,7 +145,6 @@ function singleDeltaMessageToAisData(msg) {
     },
     {}
   )
-
   return {[msg.context.substring(8)]: data}
 }
 
