@@ -16,7 +16,7 @@ function parseJSON(response) {
 }
 
 function get({url}) {
-  const request = fetch(url)
+  const request = fetch(url, {credentials: 'include'})
     .then(checkStatus)
     .then(parseJSON)
   return Bacon.fromPromise(request)
