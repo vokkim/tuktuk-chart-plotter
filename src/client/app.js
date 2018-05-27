@@ -19,7 +19,7 @@ import {
 } from './enums'
 import Map from './map'
 import Connection from './data-connection'
-import { toRadians, toNauticalMiles, distanceBetweenCoordinates, beringBetweenCoordinates, toDegrees } from './utils'
+import { toRadians, toNauticalMiles, beringBetweenCoordinates, toDegrees } from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 import {settings, clearSettingsFromLocalStorage} from './settings'
@@ -405,12 +405,14 @@ waypointInstrument.onValue(({waypointInstrument }) => {
   if( typeof waypointInstrument['navigation.position'] == 'object'
   && typeof global.waypointObj == 'object' ) {
     var wpPos = global.waypointObj._latlng
-    var vesselPos = waypointInstrument['navigation.position']
 
-    var dtw = distanceBetweenCoordinates(vesselPos.latitude, vesselPos.longitude, wpPos.lat, wpPos.lng)
+    var vesselPos = {}
+    vesselPos.lat = waypointInstrument['navigation.position'].latitude
+    vesselPos.lon = waypointInstrument['navigation.position'].longitude
+    var dtw = wpPos.distanceTo(vesselPos)
     waypointInstrument['performance.dtw'] = dtw*1000
 
-    var wayPointBearing = beringBetweenCoordinates(vesselPos.latitude, vesselPos.longitude, wpPos.lat, wpPos.lng)
+    var wayPointBearing = beringBetweenCoordinates(vesselPos.lat, vesselPos.lon, wpPos.lat, wpPos.lng)
     var boatBearing = toDegrees(waypointInstrument['navigation.courseOverGroundTrue'])
     var diffBearing = wayPointBearing-boatBearing
     var btw = Math.abs(diffBearing)
