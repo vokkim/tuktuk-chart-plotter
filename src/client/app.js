@@ -18,8 +18,9 @@ import {
   EXTENSION_LINE_10_MIN
 } from './enums'
 import Map from './map'
+import {getBearing} from 'geolib'
 import Connection from './data-connection'
-import { toRadians, toNauticalMiles, beringBetweenCoordinates, toDegrees } from './utils'
+import { toRadians, toNauticalMiles, toKnots } from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 import {settings, clearSettingsFromLocalStorage} from './settings'
@@ -410,21 +411,18 @@ waypointInstrument.onValue(({waypointInstrument }) => {
     vesselPos.lat = waypointInstrument['navigation.position'].latitude
     vesselPos.lon = waypointInstrument['navigation.position'].longitude
     var dtw = wpPos.distanceTo(vesselPos)
-    waypointInstrument['performance.dtw'] = dtw*1000
+    waypointInstrument['performance.dtw'] = dtw
 
-    var wayPointBearing = beringBetweenCoordinates(vesselPos.lat, vesselPos.lon, wpPos.lat, wpPos.lng)
-    var boatBearing = toDegrees(waypointInstrument['navigation.courseOverGroundTrue'])
-    var diffBearing = wayPointBearing-boatBearing
-    var btw = Math.abs(diffBearing)
-    waypointInstrument['performance.btw'] = toRadians(diffBearing)
-
-    var vmgPercentage = 1-(btw/90)
+    var diffBearing = getBearing(wpPos, vesselPos)
+    if(diffBearing > 180 ){
+      diffBearing = 180-(diffBearing-180) // make it display as the amount of offset degrees for both side
+    }
+    var vmgPercentage = 1-(diffBearing/90)
     var vmg = (waypointInstrument['navigation.speedOverGround']*vmgPercentage)
 
+    waypointInstrument['performance.btw'] = toRadians(diffBearing)
     waypointInstrument['performance.vmg'] = vmg
-
-    var eta = dtw/vmg
-    waypointInstrument['performance.eta'] = eta
+    waypointInstrument['performance.eta'] =  toNauticalMiles(dtw)/toKnots(vmg);
   }
 })
 
