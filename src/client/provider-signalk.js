@@ -52,15 +52,7 @@ function connect({address, settings}) {
   }
 
   const signalk = new SignalK.Client()
-  const connection = signalk.connectDelta(
-    parseAddress(address),
-    onMessage,
-    onConnect,
-    onDisconnect,
-    onError,
-    onDisconnect,
-    'none'
-  )
+  signalk.connectDelta(parseAddress(address), onMessage, onConnect, onDisconnect, onError, onDisconnect, 'none')
   const selfStream = rawStream.filter(msg => isSelf(msg.context))
 
   const updates = selfStream.map(msg => {
@@ -86,102 +78,80 @@ function connect({address, settings}) {
     })
     .debounceImmediate(1000)
 
-  const aisData = selfStream.take(1).flatMap(() => {
-    const {aisData} = parseAISData({connection, address, rawStream, settings})
-    return aisData
-  })
+  const {aisData, getVesselAisData} = parseAISData({selfStream, address, rawStream, settings})
 
   return {
     connectionState: connectionState,
     rawStream,
     selfData,
-    aisData
+    aisData,
+    getVesselAisData
   }
 }
 
-function parseAISData({address, rawStream, settings}) {
-  const aisEnabled = settings
-    .changes()
-    .map(s => _.get(s, 'ais.enabled', false))
-    .skipDuplicates()
+function parseAISData({selfStream, address, rawStream, settings}) {
+  const hasSelf = selfStream
+    .take(1)
+    .map(true)
+    .toProperty(false)
+  const aisEnabled = settings.map(s => _.get(s, 'ais.enabled', false)).skipDuplicates()
   //TODO: Subscribe / unsubscribe for AIS vessels
-  const aisStream = rawStream.filter(msg => !isSelf(msg.context)).map(singleDeltaMessageToAisData)
-  const fullAisData = aisEnabled
-    .flatMapLatest(enabled => {
-      return enabled ? getInitialAISData(address) : Bacon.once()
+  const aisStream = rawStream
+    .filter(aisEnabled)
+    .map(singleDeltaMessageToAisData)
+    .bufferWithTimeOrCount(1000, 100)
+    .map(deltas => _.reduce(deltas, _.merge, {}))
+  const fullAisData = Bacon.combineTemplate({
+    hasSelf,
+    aisEnabled
+  })
+    .flatMapLatest(({hasSelf, aisEnabled}) => {
+      return hasSelf && aisEnabled ? getInitialAISData(address).concat(aisStream) : Bacon.once()
     })
-    .merge(aisStream)
-    .scan({delta: [], full: {}}, (previous, vesselData) => {
-      const delta = _.reduce(
-        vesselData,
-        (sum, row) => {
-          if (!isSelf(row.vessel)) {
-            sum[row.vessel] = _.merge(previous.full[row.vessel], row.data)
-          }
-          return sum
-        },
-        {}
-      )
-      return {delta, full: _.merge(previous.full, delta)}
+    .scan({delta: {}, full: {}}, (previous, data) => {
+      const full = _.merge({}, previous.full, _.omitBy(data, (value, key) => isSelf(key)))
+      const delta = _.pick(full, _.keys(data))
+      return {delta, full}
     })
 
   const deltaAisData = fullAisData.map('.delta').filter(d => !_.isEmpty(d))
 
+  function getVesselAisData(vesselId) {
+    return fullAisData
+      .map(data => data.full[vesselId])
+      .filter(_.identity)
+      .skipDuplicates(_.isEqual)
+  }
+
   return {
-    aisData: deltaAisData
+    aisData: deltaAisData,
+    getVesselAisData
   }
 }
 
 function singleDeltaMessageToAisData(msg) {
-  return _(msg.updates)
-    .map(u =>
-      _.map(u.values, v => {
-        const isName = v.value && v.value.name && _.isEmpty(v.path)
-        const isMmsi = v.value && v.value.mmsi && _.isEmpty(v.path)
-        const path = (isName && 'name') || (isMmsi && 'mmsi') || v.path
-        const value = (isName && v.value.name) || (isMmsi && v.value.mmsi) || v.value
-        const data = {
-          timestamp: u.timestamp,
-          path,
-          value
-        }
-        return {vessel: msg.context.substring(8), data: {[path]: data}}
+  if (!msg.context) {
+    return {} // Not a proper SK delta message
+  }
+  const data = _.reduce(
+    msg.updates,
+    (sum, update) => {
+      const {timestamp} = update
+      _.each(update.values, value => {
+        _.set(sum, value.path + '.value', value.value)
+        _.set(sum, value.path + '.timestamp', timestamp)
       })
-    )
-    .flatten()
-    .value()
+      return sum
+    },
+    {}
+  )
+  return {[msg.context.substring(8)]: data}
 }
 
 function getInitialAISData(address) {
   const protocol = window.location.protocol
   const url = `${protocol}//${parseAddress(address)}/signalk/v1/api/`
-  return api.get({url}).map(data => {
-    const {self} = data
-    return _.reduce(
-      data.vessels,
-      (sum, vessel, key) => {
-        if (key === self) {
-          return sum
-        }
-        const navigationData = _.reduce(
-          vessel.navigation,
-          (sum, v, key) => {
-            const path = `navigation.${key}`
-            const value = v.value ? v.value : _.omit(v, ['$source', 'timestamp', 'pgn'])
-            const timestamp = v.timestamp
-            sum[path] = {path, timestamp, value}
-            return sum
-          },
-          {}
-        )
-
-        const data = _.merge({name: vessel.name}, navigationData)
-        sum.push({vessel: key, data})
-        return sum
-      },
-      []
-    )
-  })
+  return api.get({url}).map('.vessels')
 }
 
 function parseAddress(address) {

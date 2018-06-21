@@ -19,6 +19,7 @@ import {
 } from './enums'
 import Map from './map'
 import {getBearing} from 'geolib'
+import Ais from './ais'
 import Connection from './data-connection'
 import { toRadians, toNauticalMiles, toKnots } from './utils'
 import InstrumentConfig from './instrument-config'
@@ -445,7 +446,12 @@ const App = (
             </div>
           )
         } else {
-          return <Map connection={connection} settings={settings} drawObject={drawObject} />
+          return (
+            <div>
+              <Map connection={connection} settings={settings} drawObject={drawObject} />
+              <Ais connection={connection} settings={settings} />
+            </div>
+          )
         }
       })}
   </div>
