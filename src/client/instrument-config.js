@@ -88,7 +88,7 @@ const InstrumentConfigs = {
     format: '0:00',
     unit: 'h'
   },
-  dtw:{
+  dtw: {
     dataKey: 'performance.dtw',
     transformFn: toNauticalMiles,
     className: 'dtw',
@@ -96,7 +96,7 @@ const InstrumentConfigs = {
     format: '0.00',
     unit: 'Nm'
   },
-  btw:{
+  btw: {
     dataKey: 'performance.btw',
     transformFn: toDegrees,
     className: 'btw',

@@ -21,7 +21,7 @@ import Map from './map'
 import {getBearing} from 'geolib'
 import Ais from './ais'
 import Connection from './data-connection'
-import { toRadians, toNauticalMiles, toKnots } from './utils'
+import {toRadians, toNauticalMiles, toKnots} from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 import {settings, clearSettingsFromLocalStorage} from './settings'
@@ -54,12 +54,13 @@ const Controls = ({settings, connectionState}) => {
       <div className="top-bar-controls-right">
         {<PathDrawControls settings={settings} />}
         <TopBarButton
-            className='waypoint'
-            enabled={settings.view(L.prop('waypoint'))}
-            iconClass='icon-flag'
-            onClick={onClickWaypoint} />
+          className="waypoint"
+          enabled={settings.view(L.prop('waypoint'))}
+          iconClass="icon-flag"
+          onClick={onClickWaypoint}
+        />
         <TopBarButton
-          className='instruments'
+          className="instruments"
           enabled={settings.view(L.prop('showInstruments'))}
           iconClass="icon-meter"
           onClick={() => settings.view(L.prop('showInstruments')).modify(v => !v)}
@@ -146,18 +147,19 @@ const PathDrawControls = ({settings}) => {
       <TopBarButton
         className="drawMode"
         enabled={settings.view(L.prop('drawMode'))}
-        iconClass='icon-pencil2'
-        onClick={onClickDraw}/>
+        iconClass="icon-pencil2"
+        onClick={onClickDraw}
+      />
     </div>
   )
 }
 
-const onClickDraw = function(){
+const onClickDraw = function() {
   settings.view(L.prop('drawMode')).modify(v => !v)
   settings.view(L.prop('waypoint')).set(false)
 }
 
-const onClickWaypoint = function(){
+const onClickWaypoint = function() {
   settings.view(L.prop('waypoint')).modify(v => !v)
   settings.view(L.prop('drawMode')).set(false)
 }
@@ -395,7 +397,7 @@ class Accordion extends React.Component {
 }
 
 const waypointInstrument = Bacon.combineTemplate({
-  waypointInstrument : connection.selfData,
+  waypointInstrument: connection.selfData
 })
 
 /**
@@ -403,32 +405,28 @@ const waypointInstrument = Bacon.combineTemplate({
  * Dispite others instrument that display data from the signalK server.
  * Those four are generated inside upon new location, speed and course received from server.
  */
-waypointInstrument.onValue(({waypointInstrument }) => {
-  if( typeof waypointInstrument['navigation.position'] == 'object'
-  && typeof global.waypointObj == 'object' ) {
-    var wpPos = global.waypointObj._latlng
+waypointInstrument.onValue(({waypointInstrument}) => {
+  if (typeof waypointInstrument['navigation.position'] === 'object' && typeof global.waypointObj === 'object') {
+    const wpPos = global.waypointObj._latlng
 
-    var vesselPos = {}
+    const vesselPos = {}
     vesselPos.lat = waypointInstrument['navigation.position'].latitude
     vesselPos.lon = waypointInstrument['navigation.position'].longitude
-    var dtw = wpPos.distanceTo(vesselPos)
+    const dtw = wpPos.distanceTo(vesselPos)
     waypointInstrument['performance.dtw'] = dtw
 
-    var diffBearing = getBearing(wpPos, vesselPos)
-    if(diffBearing > 180 ){
-      diffBearing = 180-(diffBearing-180) // make it display as the amount of offset degrees for both side
+    let diffBearing = getBearing(wpPos, vesselPos)
+    if (diffBearing > 180) {
+      diffBearing = 180 - (diffBearing - 180) // make it display as the amount of offset degrees for both side
     }
-    var vmgPercentage = 1-(diffBearing/90)
-    var vmg = (waypointInstrument['navigation.speedOverGround']*vmgPercentage)
+    const vmgPercentage = 1 - diffBearing / 90
+    const vmg = waypointInstrument['navigation.speedOverGround'] * vmgPercentage
 
     waypointInstrument['performance.btw'] = toRadians(diffBearing)
     waypointInstrument['performance.vmg'] = vmg
-    waypointInstrument['performance.eta'] =  toNauticalMiles(dtw)/toKnots(vmg);
+    waypointInstrument['performance.eta'] = toNauticalMiles(dtw) / toKnots(vmg)
   }
 })
-
-
-
 
 const App = (
   <div>

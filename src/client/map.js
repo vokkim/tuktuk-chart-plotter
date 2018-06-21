@@ -94,16 +94,13 @@ function initMap(connection, settings, drawObject) {
       }
     }
   })
-  
+
   settings.view(L.prop('waypoint')).set(false)
-  handleAisTargets({map, aisData: connection.aisData, settings})
   handleDrawPath({map, settings, drawObject})
   handleMapZoom()
   handleDragAndFollow()
   handleInstrumentsToggle()
   handleDrawWaypoint({map, settings})
-
-
   function handleDrawWaypoint({map, settings}) {
     const waypointMarker = Leaf.icon({
       iconUrl: 'path-marker.png',
@@ -115,21 +112,20 @@ function initMap(connection, settings, drawObject) {
      * Initiate behaviour or the waypoint button.
      */
     Bacon.fromEvent(map, 'click')
-        .filter(settings.view(L.prop('waypoint')))
-        .map(e => {
-          const {latlng} = e
-          if(global.waypointObj == Object(global.waypointObj) ){
-            map.removeLayer(global.waypointObj)
-          }
-          const marker = Leaf.marker(latlng, {icon: waypointMarker})
-          global.waypointObj = marker;
-          settings.view(L.prop('waypoint')).set(false)
-          return marker
-        })
-        .onValue(marker => {
-          marker.addTo(map)
-        })
-
+      .filter(settings.view(L.prop('waypoint')))
+      .map(e => {
+        const {latlng} = e
+        if (global.waypointObj === Object(global.waypointObj)) {
+          map.removeLayer(global.waypointObj)
+        }
+        const marker = Leaf.marker(latlng, {icon: waypointMarker})
+        global.waypointObj = marker
+        settings.view(L.prop('waypoint')).set(false)
+        return marker
+      })
+      .onValue(marker => {
+        marker.addTo(map)
+      })
   }
 
   function handleMapZoom() {
