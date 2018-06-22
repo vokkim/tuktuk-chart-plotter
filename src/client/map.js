@@ -94,7 +94,7 @@ function initMap(connection, settings, drawObject) {
       }
     }
   })
-
+  settings.leafletWaypoint = false
   settings.view(L.prop('waypoint')).set(false)
   handleDrawPath({map, settings, drawObject})
   handleMapZoom()
@@ -114,14 +114,14 @@ function initMap(connection, settings, drawObject) {
     Bacon.fromEvent(map, 'click')
       .filter(settings.view(L.prop('waypoint')))
       .map(e => {
-        const {latlng} = e
-        if (global.waypointObj === Object(global.waypointObj)) {
-          map.removeLayer(global.waypointObj)
+        if (settings.leafletWaypoint !== false) {
+          map.removeLayer(settings.leafletWaypoint)
         }
-        const marker = Leaf.marker(latlng, {icon: waypointMarker})
-        global.waypointObj = marker
-        settings.view(L.prop('waypoint')).set(false)
-        return marker
+
+        const {latlng} = e
+        settings.leafletWaypoint = Leaf.marker(latlng, {icon: waypointMarker})
+        settings.view('waypoint').set(false)
+        return settings.leafletWaypoint
       })
       .onValue(marker => {
         marker.addTo(map)

@@ -406,8 +406,8 @@ const waypointInstrument = Bacon.combineTemplate({
  * Those four are generated inside upon new location, speed and course received from server.
  */
 waypointInstrument.onValue(({waypointInstrument}) => {
-  if (typeof waypointInstrument['navigation.position'] === 'object' && typeof global.waypointObj === 'object') {
-    const wpPos = global.waypointObj._latlng
+  if (typeof waypointInstrument['navigation.position'] === 'object' && settings.leafletWaypoint !== false) {
+    const wpPos = settings.leafletWaypoint._latlng
 
     const vesselPos = {}
     vesselPos.lat = waypointInstrument['navigation.position'].latitude
