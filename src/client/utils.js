@@ -38,14 +38,15 @@ function toNauticalMiles(distance) {
  * @param {Number} decimalHours - decimal value of hours
  * @return {Number} The amount of minutes.
  */
-function toHhmm(decimalHours) {
+function toHhmm(decimalHours){
   if (_.isFinite(decimalHours)) {
     if (decimalHours < 0) {
-      decimalHours = 0
+      decimalHours = 0;
     }
-    return decimalHours * 60
+    return decimalHours*60
   }
 }
+
 
 module.exports = {
   toDegrees,
@@ -54,3 +55,5 @@ module.exports = {
   toNauticalMiles,
   toHhmm
 }
+
+
