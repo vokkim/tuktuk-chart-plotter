@@ -107,7 +107,7 @@ function fetchSignalKCharts(provider, hiddenChartProviders) {
     .flatMap(charts => {
       return Bacon.fromArray(
         _.map(charts, chart => {
-          const tilemapUrl = address + chart.tilemapUrl
+          const tilemapUrl = chart.tilemapUrl.startsWith('http') ? chart.tilemapUrl : address + chart.tilemapUrl
           const from = _.pick(chart, [
             'type',
             'name',
