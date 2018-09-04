@@ -31,8 +31,8 @@ git push --tags origin
 echo "Publish to npm"
 npm publish
 
-echo "Publish to S3"
-AWS_PROFILE=plotteri aws s3 cp --recursive public/ s3://plotteri.merikartat.space/public --region=eu-central-1 --acl public-read
-AWS_PROFILE=plotteri aws s3 cp s3-index.html s3://plotteri.merikartat.space/index.html --region=eu-central-1 --acl public-read
+#echo "Publish to S3"
+#AWS_PROFILE=plotteri aws s3 cp --recursive public/ s3://plotteri.merikartat.space/public --region=eu-central-1 --acl public-read
+#AWS_PROFILE=plotteri aws s3 cp s3-index.html s3://plotteri.merikartat.space/index.html --region=eu-central-1 --acl public-read
 
 echo "DONE!"
