@@ -208,8 +208,22 @@ const Menu = ({settings}) => {
             <MenuCheckbox
               className="ais"
               label="AIS Targets"
-              checked={settings.view(L.compose(L.prop('ais'), L.prop('enabled')))}
-              onClick={() => settings.view(L.compose(L.prop('ais'), L.prop('enabled'))).modify(v => !v)}
+              checked={settings.view(
+                L.compose(
+                  L.prop('ais'),
+                  L.prop('enabled')
+                )
+              )}
+              onClick={() =>
+                settings
+                  .view(
+                    L.compose(
+                      L.prop('ais'),
+                      L.prop('enabled')
+                    )
+                  )
+                  .modify(v => !v)
+              }
             />
             <MenuSwitch
               className="heading"
@@ -276,7 +290,14 @@ const ChartRow = ({provider, onClick}) => {
 const ChartSettings = ({chartProviders}) => {
   const renderProviderRow = provider => {
     const onClick = () =>
-      chartProviders.view(L.compose(L.find(p => p.id === provider.id), L.prop('enabled'))).modify(v => !v)
+      chartProviders
+        .view(
+          L.compose(
+            L.find(p => p.id === provider.id),
+            L.prop('enabled')
+          )
+        )
+        .modify(v => !v)
     return <ChartRow provider={provider} onClick={onClick} />
   }
 
@@ -293,9 +314,10 @@ const ChartSettings = ({chartProviders}) => {
 }
 
 class InstrumentSettings extends React.Component {
-  componentWillMount() {
+  constructor(props) {
+    super(props)
     const allConfigs = _.keys(InstrumentConfig)
-    const initialInstruments = this.props.instrumentSettings.get()
+    const initialInstruments = props.instrumentSettings.get()
     const initialSortOrder = _.sortBy(allConfigs, key => {
       const i = _.indexOf(initialInstruments, key)
       return i === -1 ? Number.MAX_VALUE : i
