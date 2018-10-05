@@ -226,9 +226,16 @@ function addCharts(map, providers, providersP) {
     map.createPane(pane)
     const bounds = parseChartBounds(provider)
     // 'detectRetina' messes up Leaflet maxNativeZoom, fix with a hack:
-    const maxNativeZoom = maxzoom ? maxzoom - (Leaf.Browser.retina ? 1 : 0) : undefined
-    const minNativeZoom = minzoom ? minzoom + (Leaf.Browser.retina ? 1 : 0) : undefined
-    const layer = Leaf.tileLayer(tilemapUrl, {detectRetina: true, bounds, maxNativeZoom, minNativeZoom, pane})
+    const maxNativeZoom = maxzoom ? (maxzoom - Leaf.Browser.retina ? 1 : 0) : undefined
+    const minNativeZoom = minzoom ? (minzoom + Leaf.Browser.retina ? 1 : 0) : undefined
+    const layer = Leaf.tileLayer(tilemapUrl, {
+      detectRetina: true,
+      bounds: bounds,
+      maxZoom: maxNativeZoom,
+      minZoom: minNativeZoom,
+      pane: pane,
+      className: name
+    })
 
     if (enabled) {
       layer.addTo(map)
