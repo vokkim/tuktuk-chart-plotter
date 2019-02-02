@@ -6,6 +6,9 @@ const production = process.env.NODE_ENV === 'production'
 console.log('Webpack production mode: ', production)
 
 module.exports = {
+  node: {
+  fs: 'empty'
+},
   bail: true,
   mode: production ? 'production' : 'development',
   entry: path.resolve(__dirname, 'src/client/app.js'),

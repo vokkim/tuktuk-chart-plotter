@@ -96,7 +96,6 @@ function initMap(connection, settings, drawObject) {
   })
   settings.leafletWaypoint = false
   settings.view(L.prop('waypoint')).set(false)
-  handleAisTargets({map, aisData: connection.aisData, settings})
   handleDrawPath({map, settings, drawObject})
   handleMapZoom()
   handleDragAndFollow()
