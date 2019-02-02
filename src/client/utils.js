@@ -11,7 +11,7 @@ function toDegrees(angle) {
 
 function toRadians(angle) {
   if (_.isFinite(angle)) {
-    return angle * Math.PI / 180
+    return (angle * Math.PI) / 180
   } else {
     return null
   }
