@@ -85,7 +85,7 @@ const InstrumentConfigs = {
     transformFn: toHhmm,
     className: 'eta',
     title: 'ETA',
-    format: '0:00',
+    format: '0:00:00',
     unit: 'h'
   },
   dtw:{

@@ -39,12 +39,8 @@ function toNauticalMiles(distance) {
  * @return {Number} The amount of minutes.
  */
 function toHhmm(decimalHours){
-  if (_.isFinite(decimalHours)) {
-    if (decimalHours < 0) {
-      decimalHours = 0;
-    }
-    return decimalHours*60
-  }
+    let min = (decimalHours - Math.floor(decimalHours))*60;
+    return Math.floor(decimalHours)+':'+Math.floor(min);
 }
 
 

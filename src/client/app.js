@@ -446,8 +446,8 @@ waypointInstrument.onValue(({waypointInstrument}) => {
     waypointInstrument['performance.btw'] = toRadians(offset)
 
     // V M G
-    var vmgPercentage = 1-( Math.abs(offset)/90)
-    var vmg = (waypointInstrument['navigation.speedOverGround']*vmgPercentage)
+    let vmgPercentage = 1-( Math.abs(offset)/90)
+    let vmg = (waypointInstrument['navigation.speedOverGround']*vmgPercentage)
     waypointInstrument['performance.vmg'] = vmg
 
     // E T A
