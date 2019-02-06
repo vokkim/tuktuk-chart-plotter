@@ -21,7 +21,7 @@ import Map from './map'
 import {getBearing} from 'geolib'
 import Ais from './ais'
 import Connection from './data-connection'
-import { toRadians, toNauticalMiles, toKnots } from './utils'
+import { toRadians, toNauticalMiles, toKnots, toDegrees } from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 import {settings, clearSettingsFromLocalStorage} from './settings'
@@ -427,24 +427,31 @@ const waypointInstrument = Bacon.combineTemplate({
  */
 waypointInstrument.onValue(({waypointInstrument}) => {
   if (typeof waypointInstrument['navigation.position'] === 'object' && settings.leafletWaypoint !== false) {
-    const wpPos = settings.leafletWaypoint._latlng
 
-    var vesselPos = {}
+    let vesselPos = {}
     vesselPos.lat = waypointInstrument['navigation.position'].latitude
     vesselPos.lon = waypointInstrument['navigation.position'].longitude
-    var dtw = wpPos.distanceTo(vesselPos)
-    waypointInstrument['performance.dtw'] = dtw
 
-    var diffBearing = getBearing(wpPos, vesselPos)
-    if(diffBearing > 180 ){
-      diffBearing = 180-(diffBearing-180) // make it display as the amount of offset degrees for both side
+    // D T W
+    waypointInstrument['performance.dtw'] = settings.leafletWaypoint._latlng.distanceTo(vesselPos) ;
+
+    // B T W
+    let bearingOfWaypoint = getBearing(vesselPos, settings.leafletWaypoint._latlng);
+    let offset = toDegrees(waypointInstrument['navigation.courseOverGroundTrue']) - bearingOfWaypoint ;
+    if( offset < -180 ){
+      offset = offset + 360 ;
+    }else if(offset > 180){
+      offset = offset - 360 ;
     }
-    var vmgPercentage = 1-(diffBearing/90)
-    var vmg = (waypointInstrument['navigation.speedOverGround']*vmgPercentage)
+    waypointInstrument['performance.btw'] = toRadians(offset)
 
-    waypointInstrument['performance.btw'] = toRadians(diffBearing)
+    // V M G
+    var vmgPercentage = 1-( Math.abs(offset)/90)
+    var vmg = (waypointInstrument['navigation.speedOverGround']*vmgPercentage)
     waypointInstrument['performance.vmg'] = vmg
-    waypointInstrument['performance.eta'] =  toNauticalMiles(dtw)/toKnots(vmg);
+
+    // E T A
+    waypointInstrument['performance.eta'] =  toNauticalMiles(waypointInstrument['performance.dtw']) / toKnots(vmg);
   }
 })
 
