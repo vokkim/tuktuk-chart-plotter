@@ -33,9 +33,23 @@ function toNauticalMiles(distance) {
   }
 }
 
+/**
+ * Convert hours to minutes and set negative values to zero
+ * @param {Number} decimalHours - decimal value of hours
+ * @return {Number} The amount of minutes.
+ */
+function toHhmm(decimalHours){
+    let min = (decimalHours - Math.floor(decimalHours))*60;
+    return Math.floor(decimalHours)+':'+Math.floor(min);
+}
+
+
 module.exports = {
   toDegrees,
   toRadians,
   toKnots,
-  toNauticalMiles
+  toNauticalMiles,
+  toHhmm
 }
+
+

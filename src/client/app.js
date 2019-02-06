@@ -18,9 +18,10 @@ import {
   EXTENSION_LINE_10_MIN
 } from './enums'
 import Map from './map'
+import {getBearing} from 'geolib'
 import Ais from './ais'
 import Connection from './data-connection'
-import {toNauticalMiles} from './utils'
+import { toRadians, toNauticalMiles, toKnots, toDegrees } from './utils'
 import InstrumentConfig from './instrument-config'
 import fullscreen from './fullscreen'
 import {settings, clearSettingsFromLocalStorage} from './settings'
@@ -53,7 +54,12 @@ const Controls = ({settings, connectionState}) => {
       <div className="top-bar-controls-right">
         {<PathDrawControls settings={settings} />}
         <TopBarButton
-          className="instruments"
+            className='waypoint'
+            enabled={settings.view(L.prop('waypoint'))}
+            iconClass='icon-flag'
+            onClick={onClickWaypoint} />
+        <TopBarButton
+          className='instruments'
           enabled={settings.view(L.prop('showInstruments'))}
           iconClass="icon-meter"
           onClick={() => settings.view(L.prop('showInstruments')).modify(v => !v)}
@@ -140,11 +146,20 @@ const PathDrawControls = ({settings}) => {
       <TopBarButton
         className="drawMode"
         enabled={settings.view(L.prop('drawMode'))}
-        iconClass="icon-pencil2"
-        onClick={() => settings.view(L.prop('drawMode')).modify(v => !v)}
-      />
+        iconClass='icon-pencil2'
+        onClick={onClickDraw}/>
     </div>
   )
+}
+
+const onClickDraw = function(){
+  settings.view(L.prop('drawMode')).modify(v => !v)
+  settings.view(L.prop('waypoint')).set(false)
+}
+
+const onClickWaypoint = function(){
+  settings.view(L.prop('waypoint')).modify(v => !v)
+  settings.view(L.prop('drawMode')).set(false)
 }
 
 const Instrument = ({value, format = '0.00', className, title, unit}) => {
@@ -400,6 +415,48 @@ class Accordion extends React.Component {
     this.setState({open: !this.state.open})
   }
 }
+
+const waypointInstrument = Bacon.combineTemplate({
+  waypointInstrument : connection.selfData,
+})
+
+/**
+ * This is calculation for 4 Instruments related to waypoint.
+ * Dispite others instrument that display data from the signalK server.
+ * Those four are generated inside upon new location, speed and course received from server.
+ */
+waypointInstrument.onValue(({waypointInstrument}) => {
+  if (typeof waypointInstrument['navigation.position'] === 'object' && settings.leafletWaypoint !== false) {
+
+    let vesselPos = {}
+    vesselPos.lat = waypointInstrument['navigation.position'].latitude
+    vesselPos.lon = waypointInstrument['navigation.position'].longitude
+
+    // D T W
+    waypointInstrument['performance.dtw'] = settings.leafletWaypoint._latlng.distanceTo(vesselPos) ;
+
+    // B T W
+    let bearingOfWaypoint = getBearing(vesselPos, settings.leafletWaypoint._latlng);
+    let offset = toDegrees(waypointInstrument['navigation.courseOverGroundTrue']) - bearingOfWaypoint ;
+    if( offset < -180 ){
+      offset = offset + 360 ;
+    }else if(offset > 180){
+      offset = offset - 360 ;
+    }
+    waypointInstrument['performance.btw'] = toRadians(offset)
+
+    // V M G
+    let vmgPercentage = 1-( Math.abs(offset)/90)
+    let vmg = (waypointInstrument['navigation.speedOverGround']*vmgPercentage)
+    waypointInstrument['performance.vmg'] = vmg
+
+    // E T A
+    waypointInstrument['performance.eta'] =  toNauticalMiles(waypointInstrument['performance.dtw']) / toKnots(vmg);
+  }
+})
+
+
+
 
 const App = (
   <div>

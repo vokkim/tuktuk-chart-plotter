@@ -94,11 +94,42 @@ function initMap(connection, settings, drawObject) {
       }
     }
   })
-
+  settings.leafletWaypoint = false
+  settings.view(L.prop('waypoint')).set(false)
   handleDrawPath({map, settings, drawObject})
   handleMapZoom()
   handleDragAndFollow()
   handleInstrumentsToggle()
+  handleDrawWaypoint({map, settings})
+
+
+  function handleDrawWaypoint({map, settings}) {
+    const waypointMarker = Leaf.icon({
+      iconUrl: 'path-marker.png',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    })
+
+    /**
+     * Initiate behaviour or the waypoint button.
+     */
+    Bacon.fromEvent(map, 'click')
+      .filter(settings.view(L.prop('waypoint')))
+      .map(e => {
+        if (settings.leafletWaypoint !== false) {
+          map.removeLayer(settings.leafletWaypoint)
+        }
+
+        const {latlng} = e
+        settings.leafletWaypoint = Leaf.marker(latlng, {icon: waypointMarker})
+        settings.view('waypoint').set(false)
+        return settings.leafletWaypoint
+      })
+      .onValue(marker => {
+        marker.addTo(map)
+      })
+  }
+
   function handleMapZoom() {
     settings
       .map('.zoom')

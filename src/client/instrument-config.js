@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import {toDegrees, toKnots} from './utils'
+import {toDegrees, toKnots, toNauticalMiles, toHhmm} from './utils'
 
 const InstrumentConfigs = {
   sog: {
@@ -69,6 +69,38 @@ const InstrumentConfigs = {
     transformFn: toDegrees,
     className: 'awa',
     title: 'AWA (STW)',
+    format: '0',
+    unit: '°'
+  },
+  vmg: {
+    dataKey: 'performance.vmg',
+    transformFn: toKnots,
+    className: 'vmg',
+    title: 'VMG',
+    format: '0.00',
+    unit: 'kn'
+  },
+  eta: {
+    dataKey: 'performance.eta',
+    transformFn: toHhmm,
+    className: 'eta',
+    title: 'ETA',
+    format: '0:00:00',
+    unit: 'h'
+  },
+  dtw:{
+    dataKey: 'performance.dtw',
+    transformFn: toNauticalMiles,
+    className: 'dtw',
+    title: 'DTW',
+    format: '0.00',
+    unit: 'Nm'
+  },
+  btw:{
+    dataKey: 'performance.btw',
+    transformFn: toDegrees,
+    className: 'btw',
+    title: 'BTW',
     format: '0',
     unit: '°'
   }
